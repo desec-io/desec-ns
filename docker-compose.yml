@@ -1,0 +1,30 @@
+version: '2'
+
+services:
+  db:
+    build: db
+    volumes:
+    - db_mysql:/var/lib/mysql
+    environment:
+    - MYSQL_ROOT_PASSWORD=${DESECSLAVE_DB_PASSWORD_root}
+    - DESECSLAVE_DB_PASSWORD_pdns
+    - DESECSLAVE_ID
+    - DESECSTACK_DBMASTER
+    - DESECSTACK_DBMASTER_USERNAME_ns1replication
+    - DESECSTACK_DBMASTER_PASSWORD_ns1replication
+    - DESECSTACK_DBMASTER_SUBJECT_ns1replication
+    volumes:
+    - ${DESECSLAVE_CERT_FOLDER}:/etc/ssl/private:ro
+
+  ns:
+    build: ns
+    environment:
+    - DESECSLAVE_DB_PASSWORD_pdns
+    depends_on:
+    - db
+    ports:
+    - "53:53"
+    - "53:53/udp"
+
+volumes:
+  db_mysql:

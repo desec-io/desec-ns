@@ -1,0 +1,9 @@
+-- Narrow down root logins
+USE mysql;
+UPDATE user SET Host = 'localhost' WHERE User = 'root';
+FLUSH PRIVILEGES;
+
+-- ns database
+CREATE DATABASE pdns;
+CREATE USER 'pdns'@'172.16.0.0/255.240.0.0' IDENTIFIED BY '${DESECSLAVE_DB_PASSWORD_pdns}';
+GRANT SELECT ON pdns.* TO 'pdns'@'172.16.0.0/255.240.0.0';
