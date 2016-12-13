@@ -14,7 +14,7 @@ services:
     - DESECSTACK_DBMASTER_PASSWORD_ns1replication
     - DESECSTACK_DBMASTER_SUBJECT_ns1replication
     volumes:
-    - ${DESECSLAVE_CERT_FOLDER}:/etc/ssl/private:ro
+    - ${DESECSLAVE_CERT_FOLDER}:/etc/ssl/private
     logging:
       driver: "syslog"
       options:
