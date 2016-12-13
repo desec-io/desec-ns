@@ -3,6 +3,7 @@ version: '2'
 services:
   db:
     build: db
+    image: desec/dedyn-dbslave:latest
     volumes:
     - db_mysql:/var/lib/mysql
     environment:
@@ -22,6 +23,7 @@ services:
 
   ns:
     build: ns
+    image: desec/dedyn-nsslave:latest
     environment:
     - DESECSLAVE_DB_PASSWORD_pdns
     depends_on:
