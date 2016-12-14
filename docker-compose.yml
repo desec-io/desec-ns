@@ -20,6 +20,7 @@ services:
       driver: "syslog"
       options:
         tag: "desec-slave/db"
+    restart: unless-stopped
 
   ns:
     build: ns
@@ -35,6 +36,7 @@ services:
       driver: "syslog"
       options:
         tag: "desec-slave/ns"
+    restart: unless-stopped
 
 volumes:
   db_mysql:
