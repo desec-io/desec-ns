@@ -1,7 +1,3 @@
-default-soa-edit=INCREMENT-WEEKS
-default-soa-mail=hostmaster.desec.io
-default-soa-name=ns1.desec.io
-default-ttl=60
 setgid=pdns
 setuid=pdns
 slave=no

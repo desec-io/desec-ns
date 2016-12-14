@@ -23,9 +23,9 @@ Although most configuration is contained in this repository, some external depen
       - `DESECSLAVE_DB_PASSWORD_pdns`: mysql password for pdns on ns
     - master-related
       - `DESECSTACK_DBMASTER`: MySQL master hostname
-      - `DESECSTACK_DBMASTER_USERNAME_ns1replication`: slave replication username. Also used in the MariaDB `log-basename` setting, i.e. it can't contain `.` or `/`.
-      - `DESECSTACK_DBMASTER_PASSWORD_ns1replication`: slave replication password
-      - `DESECSTACK_DBMASTER_SUBJECT_ns1replication`: slave 1 replication SSL certificate subject name
+      - `DESECSTACK_DBMASTER_USERNAME_replication`: slave replication username. Also used in the MariaDB `log-basename` setting, i.e. it can't contain `.` or `/`.
+      - `DESECSTACK_DBMASTER_PASSWORD_replication`: slave replication password
+      - `DESECSTACK_DBMASTER_SUBJECT_replication`: slave replication SSL certificate subject name
 
 
 How to Run

@@ -1,5 +1,5 @@
 # certificates
-DESECSLAVE_CERT_FOLDER=./certs/ns1
+DESECSLAVE_CERT_FOLDER=./certs/ns1.example.com
 
 # ns-related
 DESECSLAVE_ID=
@@ -8,6 +8,6 @@ DESECSLAVE_DB_PASSWORD_pdns=
 
 # master-related
 DESECSTACK_DBMASTER=
-DESECSTACK_DBMASTER_USERNAME_ns1replication=ns1
-DESECSTACK_DBMASTER_PASSWORD_ns1replication=
-DESECSTACK_DBMASTER_SUBJECT_ns1replication=ns1.desec.io
+DESECSTACK_DBMASTER_USERNAME_replication=ns1
+DESECSTACK_DBMASTER_PASSWORD_replication=
+DESECSTACK_DBMASTER_SUBJECT_replication=ns1.example.com

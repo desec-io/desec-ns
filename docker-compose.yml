@@ -11,9 +11,9 @@ services:
     - DESECSLAVE_DB_PASSWORD_pdns
     - DESECSLAVE_ID
     - DESECSTACK_DBMASTER
-    - DESECSTACK_DBMASTER_USERNAME_ns1replication
-    - DESECSTACK_DBMASTER_PASSWORD_ns1replication
-    - DESECSTACK_DBMASTER_SUBJECT_ns1replication
+    - DESECSTACK_DBMASTER_USERNAME_replication
+    - DESECSTACK_DBMASTER_PASSWORD_replication
+    - DESECSTACK_DBMASTER_SUBJECT_replication
     volumes:
     - ${DESECSLAVE_CERT_FOLDER}:/etc/ssl/private
     logging:
