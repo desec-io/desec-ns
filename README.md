@@ -31,9 +31,8 @@ Although most configuration is contained in this repository, some external depen
 How to Run
 -----
 
-Production:
-
-    $ ./run
+    $ docker-compose build
+    $ docker-compose run
 
 This fires up the database, retrieves and imports a copy of the pdns database from the database master host, sets up replication, and fires up the nameserver.
 
