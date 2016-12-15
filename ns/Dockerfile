@@ -17,6 +17,8 @@ RUN set -ex \
 	&& apt-get -y install gettext-base \
 	# Post-create cron hook
 	&& apt-get -y install cron curl jq mariadb-client \
+	# debugging tools
+	&& apt-get -y install dnsutils net-tools \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
