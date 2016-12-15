@@ -3,7 +3,6 @@ DESECSLAVE_CERT_FOLDER=./certs/ns1.example.com
 
 # ns-related
 DESECSLAVE_ID=
-DESECSLAVE_DB_PASSWORD_root=
 DESECSLAVE_DB_PASSWORD_pdns=
 
 # master-related

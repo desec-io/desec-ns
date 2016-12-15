@@ -7,7 +7,6 @@ services:
     volumes:
     - db_mysql:/var/lib/mysql
     environment:
-    - MYSQL_ROOT_PASSWORD=${DESECSLAVE_DB_PASSWORD_root}
     - DESECSLAVE_DB_PASSWORD_pdns
     - DESECSLAVE_ID
     - DESECSTACK_DBMASTER

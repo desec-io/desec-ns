@@ -19,7 +19,6 @@ Although most configuration is contained in this repository, some external depen
       - `DESECSLAVE_CERT_FOLDER`: `./path/to/certificates`
     - ns-related
       - `DESECSLAVE_ID`: MySQL replication slave `server-id` (must be unique across replication topology)
-      - `DESECSLAVE_DB_PASSWORD_root`: mysql root password for ns database
       - `DESECSLAVE_DB_PASSWORD_pdns`: mysql password for pdns on ns
     - master-related
       - `DESECSTACK_DBMASTER`: MySQL master hostname
