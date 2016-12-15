@@ -15,6 +15,7 @@ services:
     - DESECSTACK_DBMASTER_SUBJECT_replication
     volumes:
     - ${DESECSLAVE_CERT_FOLDER}:/etc/ssl/private
+    - db_mysql:/var/lib/mysql
     logging:
       driver: "syslog"
       options:
