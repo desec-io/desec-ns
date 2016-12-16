@@ -31,7 +31,7 @@ How to Run
 -----
 
     $ docker-compose build
-    $ docker-compose run
+    $ docker-compose up
 
 This fires up the database, retrieves and imports a copy of the pdns database from the database master host, sets up replication, and fires up the nameserver.
 
