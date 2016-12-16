@@ -20,6 +20,8 @@ Although most configuration is contained in this repository, some external depen
     - ns-related
       - `DESECSLAVE_ID`: MySQL replication slave `server-id` (must be unique across replication topology)
       - `DESECSLAVE_DB_PASSWORD_pdns`: mysql password for pdns on ns
+      - `DESECSLAVE_CARBONSERVER`: pdns `carbon-server` setting (optional)
+      - `DESECSLAVE_CARBONOURNAME`: pdns `carbon-ourname` setting (optional)
     - master-related
       - `DESECSTACK_DBMASTER`: MySQL master hostname
       - `DESECSTACK_DBMASTER_USERNAME_replication`: slave replication username. Also used in the MariaDB `log-basename` setting, i.e. it can't contain `.` or `/`.

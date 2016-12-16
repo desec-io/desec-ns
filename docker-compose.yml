@@ -26,6 +26,8 @@ services:
     build: ns
     image: desec/dedyn-nsslave:latest
     environment:
+    - DESECSLAVE_CARBONSERVER
+    - DESECSLAVE_CARBONOURNAME
     - DESECSLAVE_DB_PASSWORD_pdns
     depends_on:
     - db
