@@ -1,11 +1,10 @@
+loglevel=5
+log-dns-queries=${DESECSLAVE_LOGDNSQUERIES}
 setgid=pdns
 setuid=pdns
 slave=no
 soa-minimum-ttl=60
 version-string=powerdns
-#webserver=yes
-#webserver-address=0.0.0.0
-#webserver-allow-from=172.16.1.0/24
 carbon-server=${DESECSLAVE_CARBONSERVER}
 carbon-ourname=${DESECSLAVE_CARBONOURNAME}
 
