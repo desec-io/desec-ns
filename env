@@ -1,3 +1,7 @@
+# network
+DESECSLAVE_IPV6_SUBNET=bade:affe:dead:beef:deec::/80
+DESECSLAVE_IPV6_ADDRESS=bade:affe:dead:beef:deec:0642:ac10:0080
+
 # certificates
 DESECSLAVE_CERT_FOLDER=./certs/ns1.example.com
 

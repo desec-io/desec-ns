@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 
 services:
   db:
@@ -16,6 +16,8 @@ services:
     volumes:
     - ${DESECSLAVE_CERT_FOLDER}:/etc/ssl/private
     - db_mysql:/var/lib/mysql
+    networks:
+      rear:
     logging:
       driver: "syslog"
       options:
@@ -35,6 +37,11 @@ services:
     ports:
     - "53:53"
     - "53:53/udp"
+    networks:
+      front:
+        ipv4_address: 172.16.0.2
+        ipv6_address: ${DESECSLAVE_IPV6_ADDRESS}
+      rear:
     logging:
       driver: "syslog"
       options:
@@ -43,3 +50,17 @@ services:
 
 volumes:
   db_mysql:
+
+networks:
+  # Note that it is required that the front network ranks lower (in lexical order by
+  # name) than the other networks. See https://github.com/docker/docker/issues/27101
+  front:
+    enable_ipv6: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.0.0/24
+        gateway: 172.16.0.1
+      - subnet: ${DESECSLAVE_IPV6_SUBNET}
+  rear:
