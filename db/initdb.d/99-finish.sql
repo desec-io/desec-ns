@@ -1,4 +1,4 @@
 -- Narrow down root logins
+DROP USER 'root'@'%';
 INSTALL PLUGIN unix_socket SONAME 'auth_socket';
-UPDATE mysql.user SET Host = 'localhost', plugin = 'unix_socket' WHERE User = 'root';
-FLUSH PRIVILEGES;
+ALTER USER 'root'@'localhost' IDENTIFIED VIA unix_socket;
