@@ -29,7 +29,7 @@ Although most configuration is contained in this repository, some external depen
     - master-related
       - `DESECSTACK_DBMASTER`: MySQL master hostname
       - `DESECSTACK_DBMASTER_USERNAME_replication`: slave replication username. Also used in the MariaDB `log-basename` setting, i.e. it can't contain `.` or `/`.
-      - `DESECSTACK_DBMASTER_PASSWORD_replication`: slave replication password
+      - `DESECSTACK_DBMASTER_PASSWORD_replication`: slave replication password. Note: Passwords must have **no more than 32 characters** (MariaDB inherited [this bug](https://bugs.mysql.com/bug.php?id=43439)).
       - `DESECSTACK_DBMASTER_SUBJECT_replication`: slave replication SSL certificate subject name
 
 
