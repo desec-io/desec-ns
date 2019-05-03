@@ -64,3 +64,9 @@ networks:
         gateway: 172.16.0.1
       - subnet: ${DESECSLAVE_IPV6_SUBNET}
   rear:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.1.0/24
+        gateway: 172.16.1.1
