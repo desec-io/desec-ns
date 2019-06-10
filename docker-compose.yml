@@ -1,9 +1,10 @@
-version: '2.1'
+version: '2.2'
 
 services:
   db:
     build: db
     image: desec/dedyn-dbslave:latest
+    init: true
     volumes:
     - db_mysql:/var/lib/mysql
     environment:
@@ -27,6 +28,7 @@ services:
   ns:
     build: ns
     image: desec/dedyn-nsslave:latest
+    init: true
     environment:
     - DESECSLAVE_CARBONSERVER
     - DESECSLAVE_CARBONOURNAME
