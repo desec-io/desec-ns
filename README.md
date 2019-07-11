@@ -19,7 +19,7 @@ Although most configuration is contained in this repository, some external depen
       - `DESECSLAVE_IPV6_SUBNET`: IPv6 net, ideally /80
       - `DESECSLAVE_IPV6_ADDRESS`: IPv6 address of frontend container
     - certificates
-      - `DESECSLAVE_CERT_FOLDER`: `./path/to/certificates`
+      - `DESECSLAVE_CERT_FOLDER`: `./path/` to slave TLS key (`key.pem`), slave certificate (`crt.pem`), and CA certificate (`ca.pem`).
     - ns-related
       - `DESECSLAVE_ID`: MySQL replication slave `server-id` (must be unique across replication topology)
       - `DESECSLAVE_DB_PASSWORD_pdns`: mysql password for pdns on ns
@@ -30,7 +30,6 @@ Although most configuration is contained in this repository, some external depen
       - `DESECSTACK_DBMASTER`: MySQL master hostname
       - `DESECSTACK_DBMASTER_USERNAME_replication`: slave replication username. Also used in the MariaDB `log-basename` setting, i.e. it can't contain `.` or `/`.
       - `DESECSTACK_DBMASTER_PASSWORD_replication`: slave replication password. Note: Passwords must have **no more than 32 characters** (MariaDB inherited [this bug](https://bugs.mysql.com/bug.php?id=43439)).
-      - `DESECSTACK_DBMASTER_SUBJECT_replication`: slave replication SSL certificate subject name
 
 
 How to Run

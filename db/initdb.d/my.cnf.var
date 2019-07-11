@@ -4,5 +4,5 @@ user=${DESECSTACK_DBMASTER_USERNAME_replication}
 password=${DESECSTACK_DBMASTER_PASSWORD_replication}
 
 ssl-ca   = /etc/ssl/private/ca.pem
-ssl-cert = /etc/ssl/private/${DESECSTACK_DBMASTER_SUBJECT_replication}-cert.pem
-ssl-key  = /etc/ssl/private/${DESECSTACK_DBMASTER_SUBJECT_replication}-key.pem
+ssl-cert = /etc/ssl/private/crt.pem
+ssl-key  = /etc/ssl/private/key.pem

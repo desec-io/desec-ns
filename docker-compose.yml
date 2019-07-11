@@ -13,7 +13,6 @@ services:
     - DESECSTACK_DBMASTER
     - DESECSTACK_DBMASTER_USERNAME_replication
     - DESECSTACK_DBMASTER_PASSWORD_replication
-    - DESECSTACK_DBMASTER_SUBJECT_replication
     volumes:
     - ${DESECSLAVE_CERT_FOLDER}:/etc/ssl/private
     - db_mysql:/var/lib/mysql
