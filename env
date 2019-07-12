@@ -3,7 +3,7 @@ DESECSLAVE_IPV6_SUBNET=bade:affe:dead:beef:deec::/80
 DESECSLAVE_IPV6_ADDRESS=bade:affe:dead:beef:deec:0642:ac10:0080
 
 # certificates
-DESECSLAVE_CERT_FOLDER=./certs/ns1.example.com
+DESECSLAVE_CERT_FOLDER=./certs
 
 # ns-related
 DESECSLAVE_ID=
@@ -14,5 +14,5 @@ DESECSLAVE_LOGDNSQUERIES=no
 
 # master-related
 DESECSTACK_DBMASTER=
-DESECSTACK_DBMASTER_USERNAME_replication=ns1
+DESECSTACK_DBMASTER_USERNAME_replication=ns1_site_tld
 DESECSTACK_DBMASTER_PASSWORD_replication=
