@@ -1,4 +1,5 @@
-FROM debian:stretch
+ARG DOCKER_REGISTRY
+FROM ${DOCKER_REGISTRY}debian:stretch
 
 RUN set -ex \
 	# Prepare for adding repository
