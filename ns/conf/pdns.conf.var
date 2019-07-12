@@ -1,5 +1,4 @@
 loglevel=5
-log-dns-queries=${DESECSLAVE_LOGDNSQUERIES}
 setgid=pdns
 setuid=pdns
 slave=no

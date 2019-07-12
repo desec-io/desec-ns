@@ -32,7 +32,6 @@ services:
     - DESECSLAVE_CARBONSERVER
     - DESECSLAVE_CARBONOURNAME
     - DESECSLAVE_DB_PASSWORD_pdns
-    - DESECSLAVE_LOGDNSQUERIES
     depends_on:
     - db
     networks:
