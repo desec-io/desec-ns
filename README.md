@@ -21,7 +21,7 @@ Although most configuration is contained in this repository, some external depen
     - certificates
       - `DESECSLAVE_CERT_FOLDER`: `./path/` to slave TLS key (`key.pem`), slave certificate (`crt.pem`), and CA certificate (`ca.pem`).
     - ns-related
-      - `DESECSLAVE_ID`: MySQL replication slave `server-id` (must be unique across replication topology)
+      - `DESECSLAVE_ID`: MySQL replication slave `server-id` (must be unique across replication topology!). As this is a 32-bit value, a good value is the integer representation of the host's IPv4 unicast address (given that it is unique). Assuming that the hostname is configured correctly in the DNS, this can easily be obtained by `IFS=. read -r a b c d <<< $(dig A +short $(hostname)); echo $((a * 256 ** 3 + b * 256 ** 2 + c * 256 + d))`.
       - `DESECSLAVE_DB_PASSWORD_pdns`: mysql password for pdns on ns
       - `DESECSLAVE_CARBONSERVER`: pdns `carbon-server` setting (optional)
       - `DESECSLAVE_CARBONOURNAME`: pdns `carbon-ourname` setting (optional)

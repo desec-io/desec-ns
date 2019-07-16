@@ -1,7 +1,7 @@
 [mysqld]
 wait_timeout = 28800
 
-server-id = 2${DESECSLAVE_ID}
+server-id = ${DESECSLAVE_ID}
 binlog_format=ROW
 log-basename=${DESECSTACK_DBMASTER_USERNAME_replication}
 innodb_flush_log_at_trx_commit=1
