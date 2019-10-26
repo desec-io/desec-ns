@@ -3,7 +3,8 @@ deSEC Slave
 
 This is a docker-compose application to run a nameserver frontend server. Zone data is automatically provided to this application via database replication. The application consists of
 
-- `ns`: Slave DNS server (PowerDNS).
+- `dnsdist`: Frontend DNS load balancer (dnsdist), currently forwarding to the `ns` container. It is mainly there to support more advanced features in the future.
+- `ns`: Actual DNS server (PowerDNS).
 - `db`: MariaDB database services for `ns`. Connects to another MySQL server to receive zone data via TLS-secured replication.
 
 
@@ -52,20 +53,9 @@ Notes on Networking
   - It is not necessary to start the Docker daemon with `--ipv6` or `--fixed-cidr-v6`. However, it is recommended to run `dockerd` with `--userland-proxy=false` to avoid 
     exposing ports on the host IPv6 address through `docker-proxy`.
 
-  - This stack is IPv6-capable. To prevent evil people from abusing this app for DNS amplification attacks, it is highly recommended to employ appropriate firewall rules. 
-    This is an especially serious issue when the attacker can produce large responses easily, as is the case when the DNS service uses DNSSEC. (For a detailed description 
-    of the issue, see [here](https://wangzhengyuan.blogspot.de/2015/11/protecting-your-dns-server-against-ddos.html) for example.)
+  - This stack is IPv6-capable. To prevent evil people from abusing this app for DNS amplification attacks, it is highly recommended to rate limit requests by IP (or take 
+    some smarter precaution). In particular, consider using the iptables hashlimit module, or dnsdist's traffic policy settings.
 
-    Unfortunately, this cannot currently be done from within the docker container. We recommend the following iptables rules:
-
-        iptables -I FORWARD -p udp --dport 53 -m hashlimit --hashlimit-name DNS --hashlimit-above 20/second --hashlimit-mode srcip --hashlimit-burst 100 --hashlimit-srcmask 28 -j DROP
-        iptables -I FORWARD -p tcp --dport 53 -m hashlimit --hashlimit-name DNS --hashlimit-above 20/second --hashlimit-mode srcip --hashlimit-burst 100 --hashlimit-srcmask 28 -j DROP
-
-        ip6tables -I FORWARD -p udp --dport 53 -m hashlimit --hashlimit-name DNS --hashlimit-above 20/second --hashlimit-mode srcip --hashlimit-burst 100 --hashlimit-srcmask 64 -j DROP
-        ip6tables -I FORWARD -p tcp --dport 53 -m hashlimit --hashlimit-name DNS --hashlimit-above 20/second --hashlimit-mode srcip --hashlimit-burst 100 --hashlimit-srcmask 64 -j DROP
-
-    These commands insert the rules at the top of the `FORWARD` chain, i.e. packets are dropped before they are forwarded to the docker containers.
-
-    **Note:** Whenever you restart the docker daemon or this application (`docker-compose down; docker-compose up`), docker will insert its own rules at the top of 
-    the chain. **You therefore have to make sure that these rules get re-applied whenever docker decides to jump the queue.**
+    When using iptables, note that whenever you restart the docker daemon or this application (`docker-compose down; docker-compose up`), docker will insert its own rules 
+    at the top of the chain. You therefore have to make sure that these rules get re-applied whenever docker decides to jump the queue.
     See [this issue](https://github.com/docker/docker/issues/24848) for details and progress on this.
