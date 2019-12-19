@@ -5,6 +5,8 @@ services:
     build: ns
     image: ${DOCKER_REGISTRY}desec/slave-ns:latest
     init: true
+    cap_add:
+    - NET_ADMIN
     environment:
     - DESECSLAVE_CARBONSERVER
     - DESECSLAVE_CARBONOURNAME
@@ -12,6 +14,8 @@ services:
       middle:
         ipv4_address: 10.16.2.2
       rear:
+      rearreplication:
+        ipv4_address: 10.16.3.3
     volumes:
     - ns:/var/lib/powerdns
     logging:
@@ -39,6 +43,25 @@ services:
       driver: "syslog"
       options:
         tag: "desec-slave/dnsdist"
+    restart: unless-stopped
+
+  openvpn-client:
+    build: openvpn-client
+    image: desec/openvpn-client:latest
+    init: true
+    cap_add:
+    - NET_ADMIN
+    environment:
+    - DESECSTACK_VPN_SERVER
+    volumes:
+    - ./openvpn-client/secrets:/etc/openvpn/secrets:ro
+    networks:
+      rearreplication:
+        ipv4_address: 10.16.3.2
+    logging:
+      driver: "syslog"
+      options:
+        tag: "desec-slave/openvpn-client"
     restart: unless-stopped
 
 volumes:
@@ -70,3 +93,10 @@ networks:
       config:
       - subnet: 10.16.1.0/24
         gateway: 10.16.1.1
+  rearreplication:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.16.3.0/24
+        gateway: 10.16.3.1

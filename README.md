@@ -5,6 +5,7 @@ This is a docker-compose application to run a nameserver frontend server. Zone d
 
 - `dnsdist`: Frontend DNS load balancer (dnsdist), currently forwarding to the `ns` container. It is mainly there to support more advanced features in the future.
 - `ns`: Actual DNS server (PowerDNS).
+- `openvpn-client`: OpenVPN client container providing network services for `ns` and `replicator`.
 
 
 Requirements
@@ -21,6 +22,13 @@ Although most configuration is contained in this repository, some external depen
     - ns-related
       - `DESECSLAVE_CARBONSERVER`: pdns `carbon-server` setting (optional)
       - `DESECSLAVE_CARBONOURNAME`: pdns `carbon-ourname` setting (optional)
+    - master-related
+      - `DESECSTACK_VPN_SERVER`: VPN server hostname
+
+3.  Set up secrets for the VPN: Before setting up a deSEC slave, you will have to deploy the [deSEC main stack](https://github.com/desec-io/desec-stack) so that the slave can connect to it in order to fetch DNS data.
+    In the process of setting up the stack deployment, you will have created a PKI, for example using [easy-rsa](https://github.com/OpenVPN/easy-rsa) and [this tutorial](https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md).
+    Use this PKI now in order to create a new `client.key` and `client.crt` pair, and transfer these file securely to the slave, along with `ca.crt` and `ta.key` from the main stack deployment, and copy them into `openvpn-client/secrets/`.
+    (You can also create `client.key` locally on the slave and transfer a certificate signing request to the host at which your PKI is located.)
 
 
 How to Run
