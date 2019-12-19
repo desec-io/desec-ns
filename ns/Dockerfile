@@ -23,6 +23,8 @@ RUN set -ex \
 	&& apt-get -y install gettext-base \
 	# Post-create cron hook
 	&& apt-get -y install cron mariadb-client \
+	# VPN route
+	&& apt-get -y install iproute2 \
 	# cleanup
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
