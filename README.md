@@ -20,6 +20,7 @@ Although most configuration is contained in this repository, some external depen
       - `DESECSLAVE_IPV6_SUBNET`: IPv6 net, ideally /80
       - `DESECSLAVE_IPV6_ADDRESS`: IPv6 address of frontend container
     - ns-related
+      - `DESECSLAVE_NS_APIKEY`: `ns` API key needed for replication operations
       - `DESECSLAVE_CARBONSERVER`: pdns `carbon-server` setting (optional)
       - `DESECSLAVE_CARBONOURNAME`: pdns `carbon-ourname` setting (optional)
     - master-related

@@ -10,6 +10,7 @@ services:
     environment:
     - DESECSLAVE_CARBONSERVER
     - DESECSLAVE_CARBONOURNAME
+    - DESECSLAVE_NS_APIKEY
     networks:
       middle:
         ipv4_address: 10.16.2.2

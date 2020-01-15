@@ -1,9 +1,13 @@
 loglevel=5
+api=yes
+api-key=${DESECSLAVE_NS_APIKEY}
 setgid=pdns
 setuid=pdns
-slave=no
+slave=yes
 soa-minimum-ttl=60
 version-string=powerdns
+webserver=yes
+webserver-address=10.16.3.3
 carbon-server=${DESECSLAVE_CARBONSERVER}
 carbon-ourname=${DESECSLAVE_CARBONOURNAME}
 
