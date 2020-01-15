@@ -1,8 +1,0 @@
-[mysqldump]
-host=${DESECSTACK_DBMASTER}
-user=${DESECSTACK_DBMASTER_USERNAME_replication}
-password=${DESECSTACK_DBMASTER_PASSWORD_replication}
-
-ssl-ca   = /etc/ssl/private/ca.pem
-ssl-cert = /etc/ssl/private/crt.pem
-ssl-key  = /etc/ssl/private/key.pem

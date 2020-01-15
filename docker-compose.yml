@@ -1,29 +1,6 @@
 version: '2.2'
 
 services:
-  db:
-    build: db
-    image: ${DOCKER_REGISTRY}desec/slave-db:latest
-    init: true
-    volumes:
-    - db_mysql:/var/lib/mysql
-    environment:
-    - DESECSLAVE_DB_PASSWORD_pdns
-    - DESECSLAVE_ID
-    - DESECSTACK_DBMASTER
-    - DESECSTACK_DBMASTER_USERNAME_replication
-    - DESECSTACK_DBMASTER_PASSWORD_replication
-    volumes:
-    - ${DESECSLAVE_CERT_FOLDER}:/etc/ssl/private
-    - db_mysql:/var/lib/mysql
-    networks:
-      rear:
-    logging:
-      driver: "syslog"
-      options:
-        tag: "desec-slave/db"
-    restart: unless-stopped
-
   ns:
     build: ns
     image: ${DOCKER_REGISTRY}desec/slave-ns:latest
@@ -31,13 +8,12 @@ services:
     environment:
     - DESECSLAVE_CARBONSERVER
     - DESECSLAVE_CARBONOURNAME
-    - DESECSLAVE_DB_PASSWORD_pdns
-    depends_on:
-    - db
     networks:
       middle:
         ipv4_address: 172.16.2.2
       rear:
+    volumes:
+    - ns:/var/lib/powerdns
     logging:
       driver: "syslog"
       options:
@@ -66,7 +42,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  db_mysql:
+  ns:
 
 networks:
   # Note that it is required that the front network ranks lower (in lexical order by

@@ -7,10 +7,6 @@ version-string=powerdns
 carbon-server=${DESECSLAVE_CARBONSERVER}
 carbon-ourname=${DESECSLAVE_CARBONOURNAME}
 
-launch=gmysql
-gmysql-host=db
-gmysql-port=
-gmysql-dbname=pdns
-gmysql-user=pdns
-gmysql-password=${DESECSLAVE_DB_PASSWORD_pdns}
-gmysql-dnssec=yes
+launch=gsqlite3
+gsqlite3-database=/var/lib/powerdns/pdns.sqlite3
+gsqlite3-dnssec=on

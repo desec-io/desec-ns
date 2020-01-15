@@ -18,7 +18,7 @@ RUN echo 'deb [arch=amd64] http://repo.powerdns.com/debian stretch-auth-42 main'
 RUN set -ex \
 	&& curl https://repo.powerdns.com/FD380FBB-pub.asc | apt-key add - \
 	&& apt-get update \
-	&& apt-get install -y pdns-server pdns-backend-mysql \
+	&& apt-get install -y pdns-server pdns-backend-sqlite3 sqlite3 \
 	# credentials management via envsubst
 	&& apt-get -y install gettext-base \
 	# Post-create cron hook
