@@ -21,8 +21,6 @@ RUN set -ex \
 	&& apt-get install -y pdns-server pdns-backend-sqlite3 sqlite3 \
 	# credentials management via envsubst
 	&& apt-get -y install gettext-base \
-	# Post-create cron hook
-	&& apt-get -y install cron mariadb-client \
 	# VPN route
 	&& apt-get -y install iproute2 \
 	# cleanup
