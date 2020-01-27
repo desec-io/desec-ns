@@ -17,6 +17,8 @@ services:
       rear:
       rearreplication:
         ipv4_address: 10.16.3.3
+    sysctls:
+      net.ipv4.icmp_echo_ignore_broadcasts: 0
     volumes:
     - ns:/var/lib/powerdns
     logging:

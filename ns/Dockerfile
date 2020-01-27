@@ -4,7 +4,7 @@ FROM ${DOCKER_REGISTRY}debian:stretch
 RUN set -ex \
 	# Prepare for adding repository
 	&& apt-get update \
-	&& apt-get install -y curl gnupg
+	&& apt-get install -y curl gnupg smcroute
 
 RUN echo 'deb [arch=amd64] http://repo.powerdns.com/debian stretch-auth-42 main' \
       >> /etc/apt/sources.list \
