@@ -10,7 +10,7 @@ services:
     - DESECSLAVE_CARBONOURNAME
     networks:
       middle:
-        ipv4_address: 172.16.2.2
+        ipv4_address: 10.16.2.2
       rear:
     volumes:
     - ns:/var/lib/powerdns
@@ -31,10 +31,10 @@ services:
     - "53:53/udp"
     networks:
       front:
-        ipv4_address: 172.16.0.2
+        ipv4_address: 10.16.0.2
         ipv6_address: ${DESECSLAVE_IPV6_ADDRESS}
       middle:
-        ipv4_address: 172.16.2.3
+        ipv4_address: 10.16.2.3
     logging:
       driver: "syslog"
       options:
@@ -53,20 +53,20 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: 172.16.0.0/24
-        gateway: 172.16.0.1
+      - subnet: 10.16.0.0/24
+        gateway: 10.16.0.1
       - subnet: ${DESECSLAVE_IPV6_SUBNET}
   middle:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.16.2.0/24
-        gateway: 172.16.2.1
+      - subnet: 10.16.2.0/24
+        gateway: 10.16.2.1
   rear:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.16.1.0/24
-        gateway: 172.16.1.1
+      - subnet: 10.16.1.0/24
+        gateway: 10.16.1.1
