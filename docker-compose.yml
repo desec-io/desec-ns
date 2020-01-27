@@ -67,6 +67,26 @@ services:
         tag: "desec-slave/openvpn-client"
     restart: unless-stopped
 
+  replicator:
+    build: replicator
+    image: desec/replicator:latest
+    init: true
+    cap_add:
+    - NET_ADMIN
+    depends_on:
+    - openvpn-client
+    - ns
+    environment:
+    - DESECSLAVE_NS_APIKEY
+    networks:
+      rearreplication:
+        ipv4_address: 10.16.3.4
+    logging:
+      driver: "syslog"
+      options:
+        tag: "desec-slave/replicator"
+    restart: unless-stopped
+
 volumes:
   ns:
 

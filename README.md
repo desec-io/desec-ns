@@ -5,6 +5,7 @@ This is a docker-compose application to run a nameserver frontend server. Zone d
 
 - `dnsdist`: Frontend DNS load balancer (dnsdist), currently forwarding to the `ns` container. It is mainly there to support more advanced features in the future.
 - `ns`: Actual DNS server (PowerDNS).
+- `replicator`: Python container running a replication loop.
 - `openvpn-client`: OpenVPN client container providing network services for `ns` and `replicator`.
 
 
@@ -37,6 +38,8 @@ How to Run
 
     $ docker-compose build
     $ docker-compose up
+
+This fires up the various services, connects to the VPN, starts replicating from the master, and fires up the nameserver.
 
 
 Notes on Networking
