@@ -2,7 +2,7 @@ import json
 import os
 import re
 import sys
-from time import sleep
+from time import sleep, time
 
 import dns.message, dns.query, dns.rdatatype
 import requests
@@ -57,6 +57,7 @@ def query_serial(zone):
 
 class Catalog:
     data = None
+    last_full_check = 0  # assume last check was done a long time ago
     serial = 0  # default for a new slave zone
 
     def __init__(self):
@@ -71,6 +72,7 @@ class Catalog:
                 raise e
         else:
             print('Catalog zone created.')
+            self.last_full_check = time() + 300  # Give some time for all AXFRs to run before checking serials
 
     @property
     def domain_id(self):
@@ -112,6 +114,28 @@ class Catalog:
 
         return members
 
+    def check_all_serials(self):
+        now = time()
+
+        if now - self.last_full_check < 60:
+            return
+
+        print('Checking for stale zones ...')  # e.g. zone updates where the NOTIFY went lost
+        r = requests.get('https://{}/api/v1/serials/'.format(os.environ['DESECSTACK_VPN_SERVER']))
+        if r.status_code not in range(200, 300):
+            print(r.__dict__)
+            raise Exception()
+        serials = r.json()
+
+        local_serials = {zone['name']: zone['edited_serial'] for zone in pdns_request('get', path='/zones').json()}
+        stale_zones = {zone for zone, serial in serials.items() if serial > local_serials.get(zone, 0)}
+
+        for zone in stale_zones:
+            print(f'Queueing AXFR for stale zone {zone} ...')
+            pdns_request('put', path='/zones/{}/axfr-retrieve'.format(pdns_id(zone)))
+
+        self.last_full_check = now
+
 
 def main():
     print('Loading local zone serials ...')
@@ -132,6 +156,7 @@ def main():
         # See if the last parsed catalog is the current one
         if processed_serial == catalog.serial:
             print(f'Nothing to do (catalog {processed_serial} with {len(local_zones)} zones up to date).')
+            catalog.check_all_serials()
             sleep(1)
             continue
 
@@ -168,6 +193,8 @@ def main():
         if len(deletions) + len(additions) == 0:
             print(f'Done processing catalog with serial {catalog.serial}')
             processed_serial = catalog.serial
+
+        catalog.check_all_serials()
 
 
 if __name__ == '__main__':

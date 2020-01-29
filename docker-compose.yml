@@ -78,6 +78,7 @@ services:
     - ns
     environment:
     - DESECSLAVE_NS_APIKEY
+    - DESECSTACK_VPN_SERVER
     networks:
       rearreplication:
         ipv4_address: 10.16.3.4
