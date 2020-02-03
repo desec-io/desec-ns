@@ -112,6 +112,8 @@ class Catalog:
 
             members.add(name)
 
+        if not members:
+            raise Exception('Catalog is empty. Assuming an error condition.')
         return members
 
     def check_all_serials(self):
