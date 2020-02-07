@@ -10,6 +10,7 @@ import requests
 
 catalog_domain = 'catalog.internal.'
 master_ip = '172.16.7.3'
+slave_ip = '10.16.3.3'
 config = {
     'base_url': 'http://ns:8081/api/v1/servers/localhost',
     'headers': {
@@ -23,7 +24,7 @@ config = {
 class PDNSException(Exception):
     def __init__(self, response=None):
         self.response = response
-        return super().__init__(f'pdns response code: {response.status_code}, pdns response body: {response.text}')
+        super().__init__(f'pdns response code: {response.status_code}, pdns response body: {response.text}')
 
 
 def pdns_id(name):
@@ -45,9 +46,9 @@ def pdns_request(method, *, path, body=None):
     return r
 
 
-def query_serial(zone):
+def query_serial(zone, server):
     query = dns.message.make_query(zone, 'SOA')
-    response = dns.query.tcp(query, master_ip)
+    response = dns.query.tcp(query, server)
 
     for rrset in response.answer:
         if rrset.rdtype == dns.rdatatype.SOA:
@@ -56,9 +57,8 @@ def query_serial(zone):
 
 
 class Catalog:
-    data = None
+    data = {}
     last_full_check = 0  # assume last check was done a long time ago
-    serial = 0  # default for a new slave zone
 
     def __init__(self):
         # Provision catalog slave zone
@@ -78,18 +78,22 @@ class Catalog:
     def domain_id(self):
         return pdns_id(catalog_domain)
 
+    @property
+    def serial(self):
+        return self.data.get('serial')
+
     def _retrieve(self):
         self.data = pdns_request('get', path=f'/zones/{self.domain_id}').json()
-        self.serial = self.data['serial']
 
     def _queue_axfr(self):
-        remote_catalog_serial = query_serial(catalog_domain)
+        remote_catalog_serial = query_serial(catalog_domain, master_ip)
         if self.serial != remote_catalog_serial:
             print(f'Queueing catalog AXFR from {self.serial} to {remote_catalog_serial} ...')
             pdns_request('put', path=f'/zones/{self.domain_id}/axfr-retrieve')
 
     def update(self):
-        self._retrieve()
+        if self.serial != query_serial(catalog_domain, slave_ip):
+            self._retrieve()
 
         # Fetch the catalog freshly from master in the background if necessary
         self._queue_axfr()
