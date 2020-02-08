@@ -123,6 +123,10 @@ auth SHA256
 # enabled in the server config file.
 #comp-lzo
 
+# Write status information regularly
+status /var/log/openvpn/openvpn-status.log 15
+status-version 3
+
 # Set log file verbosity.
 verb 3
 
