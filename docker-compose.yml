@@ -88,8 +88,23 @@ services:
         tag: "desec-slave/replicator"
     restart: unless-stopped
 
+  prometheus:
+    image: prom/prometheus:latest
+    init: true
+    ports:
+    - "127.0.0.1:9090:9090"
+    volumes:
+    - ./prometheus/conf:/etc/prometheus:ro
+    - prometheus:/prometheus
+    logging:
+      driver: "syslog"
+      options:
+        tag: "desec-slave/prometheus"
+    restart: unless-stopped
+
 volumes:
   ns:
+  prometheus:
 
 networks:
   # Note that it is required that the front network ranks lower (in lexical order by
