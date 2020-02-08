@@ -6,7 +6,7 @@ RUN set -ex \
 	&& apt-get update \
 	&& apt-get install -y curl gnupg
 
-RUN echo 'deb [arch=amd64] http://repo.powerdns.com/debian stretch-dnsdist-13 main' \
+RUN echo 'deb [arch=amd64] http://repo.powerdns.com/debian stretch-dnsdist-14 main' \
       >> /etc/apt/sources.list \
  && echo 'Package: dnsdist*' \
       > /etc/apt/preferences.d/dnsdist \
