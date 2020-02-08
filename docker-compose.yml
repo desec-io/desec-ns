@@ -42,6 +42,8 @@ services:
         ipv6_address: ${DESECSLAVE_IPV6_ADDRESS}
       middle:
         ipv4_address: 10.16.2.3
+      rearmonitoring_dnsdist:
+        ipv4_address: 10.16.4.10
     logging:
       driver: "syslog"
       options:
@@ -115,6 +117,8 @@ services:
     - prometheus:/prometheus
     networks:
       rearmonitoring_openvpn-client:
+      rearmonitoring_dnsdist:
+        ipv4_address: 10.16.4.11
     logging:
       driver: "syslog"
       options:
@@ -166,3 +170,10 @@ networks:
         config:
         - subnet: 10.16.4.0/29
           gateway: 10.16.4.1
+  rearmonitoring_dnsdist:
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+        - subnet: 10.16.4.8/29
+          gateway: 10.16.4.9
