@@ -1,7 +1,6 @@
 import json
 import os
 import re
-import sys
 from time import sleep, time
 
 import dns.message, dns.query, dns.rdatatype
@@ -57,99 +56,47 @@ def query_serial(zone, server):
 
 
 class Catalog:
-    data = {}
-    last_full_check = 0  # assume last check was done a long time ago
-
-    def __init__(self):
-        # Provision catalog slave zone
-        print('Creating empty catalog zone if it does not exist yet ...')
-        try:
-            pdns_request('post', path='/zones', body={'name': catalog_domain, 'kind': 'SLAVE', 'masters': [master_ip]})
-        except PDNSException as e:
-            if e.response.status_code == 409:
-                print('Catalog zone already present.')
-            else:
-                raise e
-        else:
-            print('Catalog zone created.')
-            self.last_full_check = time() + 300  # Give some time for all AXFRs to run before checking serials
+    serials = {}
+    timestamp = 0  # assume last check was done a long time ago
 
     @property
-    def domain_id(self):
-        return pdns_id(catalog_domain)
+    def age(self):
+        return time() - self.timestamp
+
+    @property
+    def remote_serial(self):
+        return query_serial(catalog_domain, master_ip)
 
     @property
     def serial(self):
-        return self.data.get('serial')
+        return self.serials.get(catalog_domain, 0)
 
     def _retrieve(self):
-        self.data = pdns_request('get', path=f'/zones/{self.domain_id}').json()
-
-    def _queue_axfr(self):
-        remote_catalog_serial = query_serial(catalog_domain, master_ip)
-        if self.serial != remote_catalog_serial:
-            print(f'Queueing catalog AXFR from {self.serial} to {remote_catalog_serial} ...')
-            pdns_request('put', path=f'/zones/{self.domain_id}/axfr-retrieve')
-
-    def update(self):
-        if self.serial != query_serial(catalog_domain, slave_ip):
-            self._retrieve()
-
-        # Fetch the catalog freshly from master in the background if necessary
-        self._queue_axfr()
-
-    def parse(self):
-        members = set()
-        for rrset in self.data['rrsets']:
-            m = re.match(r'^([0-9a-f]{40}).zones.catalog.internal.$', rrset['name'])
-            if m is None:
-                continue
-
-            if rrset['type'] != 'PTR':
-                print('Ignoring spurious catalog rrset %s' % rrset, file=sys.stderr)
-                continue
-
-            name = rrset['records'][0]['content']
-            if name in members:
-                print('Ignoring duplicate name in catalog rrset %s' % rrset, file=sys.stderr)
-                continue
-
-            members.add(name)
-
-        if not members:
-            raise Exception('Catalog is empty. Assuming an error condition.')
-        return members
-
-    def check_all_serials(self):
-        now = time()
-
-        if now - self.last_full_check < 60:
-            return
-
-        print('Checking for stale zones ...')  # e.g. zone updates where the NOTIFY went lost
         r = requests.get('https://{}/api/v1/serials/'.format(os.environ['DESECSTACK_VPN_SERVER']))
         if r.status_code not in range(200, 300):
             print(r.__dict__)
             raise Exception()
         serials = r.json()
 
-        local_serials = {zone['name']: zone['edited_serial'] for zone in pdns_request('get', path='/zones').json()}
-        stale_zones = {zone for zone, serial in serials.items() if serial > local_serials.get(zone, 0)}
+        if len(serials) <= 1:
+            raise Exception(f'Catalog contains {len(serials)} elements. Assuming an error condition.')
 
-        for zone in stale_zones:
-            print(f'Queueing AXFR for stale zone {zone} ...')
-            pdns_request('put', path='/zones/{}/axfr-retrieve'.format(pdns_id(zone)))
+        self.serials = serials
+        self.timestamp = time()
 
-        self.last_full_check = now
+    def update(self):
+        # Return if catalog serial is unchanged and 60 second window for comprehensive serial check has not passed
+        if self.age < 60 and self.remote_serial == self.serial:
+            return False
+
+        print('Retrieving zone list ...')  # e.g. zone updates where the NOTIFY went lost
+        self._retrieve()
+        return True
 
 
 def main():
-    print('Loading local zone serials ...')
-    local_zones = {zone['name'] for zone in pdns_request('get', path='/zones').json() if zone['name'] != catalog_domain}
-    print(f'Done. Number of local zones is {len(local_zones)}.')
-
     catalog = Catalog()
-    processed_serial = 0
+    processed_serial = None
 
     while True:
         # Note that there may be AXFRs pending from the previous loop iteration. However, it is still useful to fetch
@@ -157,21 +104,37 @@ def main():
         #   - it helps discarding useless intermediate states, e.g. if a domain is quickly deleted and recreated,
         #   - if replication is stuck because the catalog is invalid, a new catalog improves chances of recovery,
         #   - waiting for all tasks to be completed would allow long-running AXFRs to hold up new catalog changes.
-        catalog.update()
+        catalog_refreshed = catalog.update()
 
-        # See if the last parsed catalog is the current one
-        if processed_serial == catalog.serial:
+        # Do nothing if catalog has not changed (no domain additions/deletions) and all serials were compared recently
+        if processed_serial == catalog.serial and not catalog_refreshed:
             print(f'Nothing to do (catalog {processed_serial} with {len(local_zones)} zones up to date).')
-            catalog.check_all_serials()
             sleep(1)
             continue
 
-        # Parse current state of catalog zone and determine slave-side changes
-        catalog_zones = catalog.parse()
+        print('Doing comprehensive serial check ...')
+
+        remote_zones = set(catalog.serials.keys())
+        local_serials = {zone['name']: zone['edited_serial'] for zone in pdns_request('get', path='/zones').json()}
+        local_zones = set(local_serials.keys())
 
         # Compute changes
-        deletions = local_zones - catalog_zones
-        additions = catalog_zones - local_zones
+        additions = remote_zones - local_zones
+        deletions = local_zones - remote_zones
+        modifications = {zone for zone, serial in local_serials.items() if catalog.serials.get(zone, 0) > serial}
+
+        # Apply additions
+        for zone in additions:
+            print(f'Adding zone {zone} ...')
+            pdns_request('post', path='/zones', body={'name': zone, 'kind': 'SLAVE', 'masters': [master_ip]})
+            local_zones.add(zone)
+            print(f'Queueing initial AXFR for zone {zone} ...')
+            pdns_request('put', path='/zones/{}/axfr-retrieve'.format(pdns_id(zone)))
+
+        # Apply modifications
+        for zone in modifications:
+            print(f'Queueing AXFR for stale zone {zone} ...')
+            pdns_request('put', path='/zones/{}/axfr-retrieve'.format(pdns_id(zone)))
 
         # Apply deletions
         for zone in deletions:
@@ -187,20 +150,8 @@ def main():
                 else:
                     raise e
 
-        # Apply additions
-        for zone in additions:
-            print(f'Adding zone {zone} ...')
-            pdns_request('post', path='/zones', body={'name': zone, 'kind': 'SLAVE', 'masters': [master_ip]})
-            local_zones.add(zone)
-            print(f'Queueing initial AXFR for zone {zone} ...')
-            pdns_request('put', path='/zones/{}/axfr-retrieve'.format(pdns_id(zone)))
-
         # Make a note that we processed this catalog version
-        if len(deletions) + len(additions) == 0:
-            print(f'Done processing catalog with serial {catalog.serial}')
-            processed_serial = catalog.serial
-
-        catalog.check_all_serials()
+        processed_serial = catalog.serial
 
 
 if __name__ == '__main__':
