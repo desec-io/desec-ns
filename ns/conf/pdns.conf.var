@@ -12,6 +12,6 @@ webserver-allow-from=10.16.3.4
 carbon-server=${DESECSLAVE_CARBONSERVER}
 carbon-ourname=${DESECSLAVE_CARBONOURNAME}
 
-launch=gsqlite3
-gsqlite3-database=/var/lib/powerdns/pdns.sqlite3
-gsqlite3-dnssec=on
+launch=lmdb
+lmdb-filename=/var/lib/powerdns/pdns.lmdb
+lmdb-sync-mode=nometasync
