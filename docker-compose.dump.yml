@@ -1,0 +1,19 @@
+version: '2.2'
+
+# mostly extending from main .yml
+services:
+  dnsdist:
+    entrypoint: ["echo", "Service disabled"]
+    restart: "no"
+
+  openvpn-client_monitor:
+    entrypoint: ["echo", "Service disabled"]
+    restart: "no"
+
+  replicator:
+    environment:
+    - DESECSLAVE_REPLICATOR_EXIT_WHEN_DONE=1
+
+  prometheus:
+    entrypoint: ["echo", "Service disabled"]
+    restart: "no"

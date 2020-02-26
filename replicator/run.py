@@ -93,35 +93,15 @@ class Catalog:
         self._retrieve()
         return True
 
-
-def main():
-    catalog = Catalog()
-    processed_serial = None
-
-    while True:
-        # Note that there may be AXFRs pending from the previous loop iteration. However, it is still useful to fetch
-        # the new catalog right away, because:
-        #   - it helps discarding useless intermediate states, e.g. if a domain is quickly deleted and recreated,
-        #   - if replication is stuck because the catalog is invalid, a new catalog improves chances of recovery,
-        #   - waiting for all tasks to be completed would allow long-running AXFRs to hold up new catalog changes.
-        catalog_refreshed = catalog.update()
-
-        # Do nothing if catalog has not changed (no domain additions/deletions) and all serials were compared recently
-        if processed_serial == catalog.serial and not catalog_refreshed:
-            print(f'Nothing to do (catalog {processed_serial} with {len(local_zones)} zones up to date).')
-            sleep(1)
-            continue
-
-        print('Doing comprehensive serial check ...')
-
-        remote_zones = set(catalog.serials.keys())
+    def perform_full_zone_sync(self):
+        remote_zones = set(self.serials.keys())
         local_serials = {zone['name']: zone['edited_serial'] for zone in pdns_request('get', path='/zones').json()}
         local_zones = set(local_serials.keys())
 
         # Compute changes
         additions = remote_zones - local_zones
         deletions = local_zones - remote_zones
-        modifications = {zone for zone, serial in local_serials.items() if catalog.serials.get(zone, 0) > serial}
+        modifications = {zone for zone, serial in local_serials.items() if self.serials.get(zone, 0) > serial}
 
         # Apply additions
         for zone in additions:
@@ -149,6 +129,43 @@ def main():
                     print(f'Zone {zone} deleted.')
                 else:
                     raise e
+
+        return additions, deletions, modifications
+
+
+def main():
+    catalog = Catalog()
+    processed_serial = None
+    exit_when_done = os.environ.get('DESECSLAVE_REPLICATOR_EXIT_WHEN_DONE', 0) == "1"
+
+    while True:
+        # Note that there may be AXFRs pending from the previous loop iteration. However, it is still useful to fetch
+        # the new catalog right away, because:
+        #   - it helps discarding useless intermediate states, e.g. if a domain is quickly deleted and recreated,
+        #   - if replication is stuck because the catalog is invalid, a new catalog improves chances of recovery,
+        #   - waiting for all tasks to be completed would allow long-running AXFRs to hold up new catalog changes.
+        catalog_refreshed = catalog.update()
+
+        # Do nothing if catalog has not changed (no domain additions/deletions) and all serials were compared recently
+        if processed_serial == catalog.serial and not catalog_refreshed:
+            print(f'Nothing to do (catalog {processed_serial} with {len(catalog.serials)} zones up to date).')
+            if exit_when_done:
+                if additions | deletions | modifications:
+                    print('Dump not yet complete. The following tasks are open:')
+                    print(f'additions {len(additions)}:', additions)
+                    print(f'deletions {len(deletions)}:', deletions)
+                    print(f'modifications {len(modifications)}:', modifications)
+                    sleep(10)  # Allow some time for background AXFRs to catch up
+                else:
+                    print('Dump complete, exiting ...')
+                    raise SystemExit
+            else:
+                sleep(1)
+                continue
+
+        # Compute and apply changes. Returns sets of domains names corresponding to added, deleted, modified domains.
+        print('Running comprehensive serial check ...')
+        additions, deletions, modifications = catalog.perform_full_zone_sync()
 
         # Make a note that we processed this catalog version
         processed_serial = catalog.serial
