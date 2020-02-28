@@ -36,6 +36,9 @@ services:
     ports:
     - "53:53"
     - "53:53/udp"
+    environment:
+    - DESECSLAVE_CARBONSERVER
+    - DESECSLAVE_CARBONOURNAME
     networks:
       front:
         ipv4_address: 10.16.0.2
