@@ -13,4 +13,7 @@ echo mgroup from eth2 group 239.1.2.3 > /etc/smcroute.conf
 # Manage credentials
 envsubst < /etc/powerdns/pdns.conf.var > /etc/powerdns/pdns.conf
 
+# Fix ownership (may be off after importing a backup)
+chown -R pdns:pdns /var/lib/powerdns
+
 exec pdns_server --daemon=no

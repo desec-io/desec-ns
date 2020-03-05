@@ -1,5 +1,4 @@
-deSEC Slave
-=====
+# deSEC Slave
 
 This is a docker-compose application to run a nameserver frontend server. Zone data is automatically provided to this application via database replication. The application consists of
 
@@ -9,8 +8,7 @@ This is a docker-compose application to run a nameserver frontend server. Zone d
 - `openvpn-client`: OpenVPN client container providing network services for `ns` and `replicator`.
 
 
-Requirements
------
+## Requirements
 
 Although most configuration is contained in this repository, some external dependencies need to be met before the application can be run. Dependencies are:
 
@@ -33,8 +31,7 @@ Although most configuration is contained in this repository, some external depen
     (You can also create `client.key` locally on the slave and transfer a certificate signing request to the host at which your PKI is located.)
 
 
-How to Run
------
+## How to Run
 
     $ docker-compose build
     $ docker-compose up
@@ -42,8 +39,26 @@ How to Run
 This fires up the various services, connects to the VPN, starts replicating from the master, and fires up the nameserver.
 
 
-Notes on Networking
------
+## LMDB Database Backups
+
+### Create backup
+
+Given a slave of any freshness (may be up to date or stale or empty), do the following:
+
+  1. Make sure the docker-compose application is not running.
+  2. Run `./dump.sh`. This fires up `ns` and `replicator` to perform a sync, waits until nothing is left to do, and then shuts everything down. Next, the script starts a `lmdb-backup` container which contains a manually built version of lmdb tooling, runs `mdb_dump` to export the database, creates a tar.gz file with everything, and puts it into `./lmdb-backup/backup/`.
+
+Caveat: Running such a dump slave on the [stack](https://github.com/desec-io/desec-stack) host fails because that requires an OpenVPN client and server on the same machine, which does not work. In other words, the dump has to run somewhere else. This may be an OpenVPN limitation, so there may not even be a fix.
+
+### Restore Backup
+
+Take a backup file created in the previous step and store it at `./lmdb-backup/backup/`.
+
+  1. Run `./load.sh $FILENAME`, where `$FILENAME` is the name of one of the files in `./lmdb-backup/backup/`. This starts a `lmdb-backup` container, extracts the file in it, runs `mdb_load`, and puts all files into the PowerDNS storage directory. The script aborts if that directory is not empty.
+  2. Start slave normally to resume regular operation, including replication.
+
+
+## Notes on Networking
 
   - It is not necessary to start the Docker daemon with `--ipv6` or `--fixed-cidr-v6`. However, it is recommended to run `dockerd` with `--userland-proxy=false` to avoid 
     exposing ports on the host IPv6 address through `docker-proxy`.

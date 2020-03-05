@@ -17,3 +17,12 @@ services:
   prometheus:
     entrypoint: ["echo", "Service disabled"]
     restart: "no"
+
+  lmdb-backup:
+    build: lmdb-backup
+    image: ${DOCKER_REGISTRY}desec/lmdb-backup:latest
+    init: true
+    volumes:
+    - ns:/var/lib/powerdns
+    - ./lmdb-backup/backup:/backup
+    restart: "no"

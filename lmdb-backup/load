@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Fail hard when anything fails
+set -e
+set -o pipefail
+
+[[ ! -z "$1" ]] || { echo 'Backup filename must be passed as first argument, aborting.'; exit 1; }
+FILENAME="/backup/$1"
+
+[[ -z "$(ls -A /var/lib/powerdns/)" ]] || { echo '/var/lib/powerdns is not empty, aborting.'; exit 2; }
+
+umask 0066
+
+echo Unzipping ...
+cd /tmp
+tar xzf "$FILENAME"
+
+echo Loading ...
+cd /var/lib/powerdns
+for file in /tmp/*.dump; do echo $file; mdb_load -f $file -n $(basename $file .dump); done
+
+echo Done
