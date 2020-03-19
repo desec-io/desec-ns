@@ -38,7 +38,8 @@ def pdns_id(name):
 def pdns_request(method, *, path, body=None):
     data = json.dumps(body) if body else None
 
-    r = requests.request(method, config['base_url'] + path, data=data, headers=config['headers'])
+    # On timeout, we don't retry, as we don't know whether the request already had a side-effect on pdns
+    r = requests.request(method, config['base_url'] + path, data=data, headers=config['headers'], timeout=10)
     if r.status_code not in range(200, 300):
         raise PDNSException(response=r)
 
@@ -72,7 +73,8 @@ class Catalog:
         return self.serials.get(catalog_domain, 0)
 
     def _retrieve(self):
-        r = requests.get('https://{}/api/v1/serials/'.format(os.environ['DESECSTACK_VPN_SERVER']))
+        # Throws Timeout exception if nothing is received for `timeout` seconds
+        r = requests.get('https://{}/api/v1/serials/'.format(os.environ['DESECSTACK_VPN_SERVER']), timeout=10)
         if r.status_code not in range(200, 300):
             print(r.__dict__)
             raise Exception()
