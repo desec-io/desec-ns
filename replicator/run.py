@@ -48,7 +48,7 @@ def pdns_request(method, *, path, body=None):
 
 def query_serial(zone, server):
     query = dns.message.make_query(zone, 'SOA')
-    response = dns.query.tcp(query, server)
+    response = dns.query.tcp(query, server, timeout=5)
 
     for rrset in response.answer:
         if rrset.rdtype == dns.rdatatype.SOA:
