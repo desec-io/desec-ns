@@ -7,7 +7,7 @@ set -o pipefail
 # use regexp in filename globbing
 shopt -s extglob  
 
-TARGET_FILE=$(date +%Y%m%d:%H%M%S)_dump.tar.gz
+TARGET_FILE=$(date +%Y%m%d-%H%M%S)_dump.tar.gz
 
 umask 0066
 
