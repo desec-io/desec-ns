@@ -9,13 +9,12 @@ import requests
 
 catalog_domain = 'catalog.internal.'
 master_ip = '172.16.7.3'
-slave_ip = '10.16.3.3'
 config = {
     'base_url': 'http://ns:8081/api/v1/servers/localhost',
     'headers': {
         'Accept': 'application/json',
-        'User-Agent': 'desecslave',
-        'X-API-Key': os.environ['DESECSLAVE_NS_APIKEY'],
+        'User-Agent': 'desec-ns',
+        'X-API-Key': os.environ['DESEC_NS_APIKEY'],
     },
 }
 
@@ -138,7 +137,7 @@ class Catalog:
 def main():
     catalog = Catalog()
     processed_serial = None
-    exit_when_done = os.environ.get('DESECSLAVE_REPLICATOR_EXIT_WHEN_DONE', 0) == "1"
+    exit_when_done = os.environ.get('DESEC_NS_REPLICATOR_EXIT_WHEN_DONE', 0) == "1"
 
     while True:
         # Note that there may be AXFRs pending from the previous loop iteration. However, it is still useful to fetch

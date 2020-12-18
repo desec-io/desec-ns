@@ -3,14 +3,14 @@ version: '2.2'
 services:
   ns:
     build: ns
-    image: ${DOCKER_REGISTRY}desec/slave-ns:latest
+    image: ${DOCKER_REGISTRY}desec/desec-ns:latest
     init: true
     cap_add:
     - NET_ADMIN
     environment:
-    - DESECSLAVE_CARBONSERVER
-    - DESECSLAVE_CARBONOURNAME
-    - DESECSLAVE_NS_APIKEY
+    - DESEC_NS_CARBONSERVER
+    - DESEC_NS_CARBONOURNAME
+    - DESEC_NS_APIKEY
     networks:
       middle:
         ipv4_address: 10.16.2.2
@@ -24,12 +24,12 @@ services:
     logging:
       driver: "syslog"
       options:
-        tag: "desec-slave/ns"
+        tag: "desec-ns/ns"
     restart: unless-stopped
 
   dnsdist:
     build: dnsdist
-    image: ${DOCKER_REGISTRY}desec/slave-dnsdist:latest
+    image: ${DOCKER_REGISTRY}desec/desec-ns-dnsdist:latest
     init: true
     depends_on:
     - ns
@@ -37,12 +37,12 @@ services:
     - "53:53"
     - "53:53/udp"
     environment:
-    - DESECSLAVE_CARBONSERVER
-    - DESECSLAVE_CARBONOURNAME
+    - DESEC_NS_CARBONSERVER
+    - DESEC_NS_CARBONOURNAME
     networks:
       front:
         ipv4_address: 10.16.0.2
-        ipv6_address: ${DESECSLAVE_IPV6_ADDRESS}
+        ipv6_address: ${DESEC_NS_IPV6_ADDRESS}
       middle:
         ipv4_address: 10.16.2.3
       rearmonitoring_dnsdist:
@@ -50,7 +50,7 @@ services:
     logging:
       driver: "syslog"
       options:
-        tag: "desec-slave/dnsdist"
+        tag: "desec-ns/dnsdist"
     restart: unless-stopped
 
   openvpn-client:
@@ -70,7 +70,7 @@ services:
     logging:
       driver: "syslog"
       options:
-        tag: "desec-slave/openvpn-client"
+        tag: "desec-ns/openvpn-client"
     restart: unless-stopped
 
   openvpn-client_monitor:
@@ -86,7 +86,7 @@ services:
     logging:
       driver: "syslog"
       options:
-        tag: "desec-slave/openvpn-client_monitor"
+        tag: "desec-ns/openvpn-client_monitor"
     restart: unless-stopped
 
   replicator:
@@ -99,7 +99,7 @@ services:
     - openvpn-client
     - ns
     environment:
-    - DESECSLAVE_NS_APIKEY
+    - DESEC_NS_APIKEY
     - DESECSTACK_VPN_SERVER
     networks:
       rearreplication:
@@ -107,7 +107,7 @@ services:
     logging:
       driver: "syslog"
       options:
-        tag: "desec-slave/replicator"
+        tag: "desec-ns/replicator"
     restart: unless-stopped
 
   prometheus:
@@ -125,7 +125,7 @@ services:
     logging:
       driver: "syslog"
       options:
-        tag: "desec-slave/prometheus"
+        tag: "desec-ns/prometheus"
     restart: unless-stopped
 
 volumes:
@@ -144,7 +144,7 @@ networks:
       config:
       - subnet: 10.16.0.0/24
         gateway: 10.16.0.1
-      - subnet: ${DESECSLAVE_IPV6_SUBNET}
+      - subnet: ${DESEC_NS_IPV6_SUBNET}
   middle:
     driver: bridge
     ipam:

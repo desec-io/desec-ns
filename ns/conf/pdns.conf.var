@@ -1,6 +1,6 @@
 loglevel=5
 api=yes
-api-key=${DESECSLAVE_NS_APIKEY}
+api-key=${DESEC_NS_APIKEY}
 setgid=pdns
 setuid=pdns
 slave=yes
@@ -8,8 +8,8 @@ version-string=powerdns
 webserver=yes
 webserver-address=10.16.3.3
 webserver-allow-from=10.16.3.4
-carbon-server=${DESECSLAVE_CARBONSERVER}
-carbon-ourname=${DESECSLAVE_CARBONOURNAME}
+carbon-server=${DESEC_NS_CARBONSERVER}
+carbon-ourname=${DESEC_NS_CARBONOURNAME}
 
 launch=lmdb
 lmdb-filename=/var/lib/powerdns/pdns.lmdb

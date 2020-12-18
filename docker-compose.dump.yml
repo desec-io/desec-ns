@@ -12,7 +12,7 @@ services:
 
   replicator:
     environment:
-    - DESECSLAVE_REPLICATOR_EXIT_WHEN_DONE=1
+    - DESEC_NS_REPLICATOR_EXIT_WHEN_DONE=1
 
   prometheus:
     entrypoint: ["echo", "Service disabled"]
