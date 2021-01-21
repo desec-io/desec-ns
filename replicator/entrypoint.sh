@@ -1,9 +1,8 @@
 #!/bin/sh
-
-# Route required for asking questions via VPN
-/sbin/ip route add 172.16.7.0/24 via 10.16.3.2
-
-# Hardcode internal IP address for www service to make sure HTTPS goes through VPN
-echo 172.16.7.4 ${DESECSTACK_VPN_SERVER} >> /etc/hosts
-
+if ! test -f "$HOME"/.ssh/id_ed25519; then
+  ssh-keygen -N "" -ted25519  -f "$HOME"/.ssh/id_ed25519
+  echo 'New Public Key generated!'
+  cat "$HOME"/.ssh/id_ed25519.pub
+fi
+echo "$DESECSTACK_SSH_KNOWN_HOST" > "$HOME"/.ssh/known_hosts
 exec python -u run.py

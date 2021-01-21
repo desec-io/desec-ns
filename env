@@ -1,3 +1,6 @@
+DESECSTACK_DOMAIN=io
+DESECSTACK_SSH_KNOWN_HOST=desec.io ssh-ed25519 AAAXXXXX....
+
 # network
 DESEC_NS_IPV6_SUBNET=bade:affe:dead:beef:deec::/80
 DESEC_NS_IPV6_ADDRESS=bade:affe:dead:beef:deec:0642:ac10:0080

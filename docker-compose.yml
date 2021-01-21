@@ -5,105 +5,38 @@ services:
     build: ns
     image: ${DOCKER_REGISTRY}desec/desec-ns:latest
     init: true
-    cap_add:
-    - NET_ADMIN
-    environment:
-    - DESEC_NS_CARBONSERVER
-    - DESEC_NS_CARBONOURNAME
-    - DESEC_NS_APIKEY
+    ports:
+    - "5300:53"
+    - "5300:53/udp"  # TODO those are debugging ports
     networks:
-      middle:
-        ipv4_address: 10.16.2.2
-      rear:
-      rearreplication:
-        ipv4_address: 10.16.3.3
-    sysctls:
-      net.ipv4.icmp_echo_ignore_broadcasts: 0
+      front:
+        ipv4_address: 10.16.0.2
+        ipv6_address: ${DESEC_NS_IPV6_ADDRESS}
     volumes:
-    - ns:/var/lib/powerdns
+    - zones:/zones  # TODO make readonly
+    - ./rundir:/rundir
+    - knotsocket:/rundir/knot
     logging:
       driver: "syslog"
       options:
         tag: "desec-ns/ns"
     restart: unless-stopped
 
-  dnsdist:
-    build: dnsdist
-    image: ${DOCKER_REGISTRY}desec/desec-ns-dnsdist:latest
-    init: true
-    depends_on:
-    - ns
-    ports:
-    - "53:53"
-    - "53:53/udp"
-    environment:
-    - DESEC_NS_CARBONSERVER
-    - DESEC_NS_CARBONOURNAME
-    networks:
-      front:
-        ipv4_address: 10.16.0.2
-        ipv6_address: ${DESEC_NS_IPV6_ADDRESS}
-      middle:
-        ipv4_address: 10.16.2.3
-      rearmonitoring_dnsdist:
-        ipv4_address: 10.16.4.10
-    logging:
-      driver: "syslog"
-      options:
-        tag: "desec-ns/dnsdist"
-    restart: unless-stopped
-
-  openvpn-client:
-    build: openvpn-client
-    image: desec/openvpn-client:latest
-    init: true
-    cap_add:
-    - NET_ADMIN
-    environment:
-    - DESECSTACK_VPN_SERVER
-    volumes:
-    - ./openvpn-client/secrets:/etc/openvpn/secrets:ro
-    - openvpn-client_logs:/var/log/openvpn
-    networks:
-      rearreplication:
-        ipv4_address: 10.16.3.2
-    logging:
-      driver: "syslog"
-      options:
-        tag: "desec-ns/openvpn-client"
-    restart: unless-stopped
-
-  openvpn-client_monitor:
-    image: kumina/openvpn-exporter:v0.2.2
-    init: true
-    depends_on:
-    - openvpn-client
-    volumes:
-    - openvpn-client_logs:/var/log/openvpn:ro
-    networks:
-    - rearmonitoring_openvpn-client
-    command: -openvpn.status_paths /var/log/openvpn/openvpn-status.log
-    logging:
-      driver: "syslog"
-      options:
-        tag: "desec-ns/openvpn-client_monitor"
-    restart: unless-stopped
-
   replicator:
+    # TODO talk to prometheus
     build: replicator
     image: desec/replicator:latest
     init: true
-    cap_add:
-    - NET_ADMIN
     depends_on:
-    - openvpn-client
     - ns
     environment:
     - DESEC_NS_APIKEY
-    - DESECSTACK_VPN_SERVER
-    networks:
-      rearreplication:
-        ipv4_address: 10.16.3.4
+    - DESECSTACK_DOMAIN
+    - DESECSTACK_SSH_KNOWN_HOST
+    volumes:
+    - replicator_keys:/root/.ssh
+    - zones:/zones
+    - knotsocket:/rundir/knot
     logging:
       driver: "syslog"
       options:
@@ -118,10 +51,6 @@ services:
     volumes:
     - ./prometheus/conf:/etc/prometheus:ro
     - prometheus:/prometheus
-    networks:
-      rearmonitoring_openvpn-client:
-      rearmonitoring_dnsdist:
-        ipv4_address: 10.16.4.11
     logging:
       driver: "syslog"
       options:
@@ -129,9 +58,10 @@ services:
     restart: unless-stopped
 
 volumes:
-  ns:
   prometheus:
-  openvpn-client_logs:
+  replicator_keys:
+  zones:
+  knotsocket:
 
 networks:
   # Note that it is required that the front network ranks lower (in lexical order by
@@ -145,38 +75,3 @@ networks:
       - subnet: 10.16.0.0/24
         gateway: 10.16.0.1
       - subnet: ${DESEC_NS_IPV6_SUBNET}
-  middle:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: 10.16.2.0/24
-        gateway: 10.16.2.1
-  rear:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: 10.16.1.0/24
-        gateway: 10.16.1.1
-  rearreplication:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: 10.16.3.0/24
-        gateway: 10.16.3.1
-  rearmonitoring_openvpn-client:
-      driver: bridge
-      ipam:
-        driver: default
-        config:
-        - subnet: 10.16.4.0/29
-          gateway: 10.16.4.1
-  rearmonitoring_dnsdist:
-      driver: bridge
-      ipam:
-        driver: default
-        config:
-        - subnet: 10.16.4.8/29
-          gateway: 10.16.4.9

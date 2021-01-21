@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+# TODO this is unused code, remove
+
+import inotify_simple as ins
+
+inotify = ins.INotify()
+watch_flags = ins.flags.CREATE | ins.flags.DELETE | ins.flags.MODIFY
+wd = inotify.add_watch('/zones', watch_flags)
+
+# And see the corresponding events:
+for event in inotify.read():
+    flags = ins.flags.from_mask(event.mask)
+    if ins.flags.CREATE in flags:
+        print('created', event.name)
+    if ins.flags.MODIFY in flags:
+        print('modified', event.name)
+    if ins.flags.DELETE in flags:
+        print('deleted', event.name)

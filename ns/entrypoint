@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+#watchio &
+exec knotd -c knot.conf -s /rundir/knot/knot.sock
