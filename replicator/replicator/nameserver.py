@@ -37,10 +37,10 @@ class KnotDNS(Nameserver):
                 stdout=subprocess.PIPE,
         ) as p:
             logger.debug('\n'.join('>>>IN> ' + s for s in stdin.split('\n')))
-            stdout, stderr = p.communicate(stdin.encode() + b'\n', timeout=5)
+            stdout, stderr = p.communicate(stdin.encode() + b'\n', timeout=30)
             p.stdin.close()
             try:
-                rcode = p.wait(timeout=5)
+                rcode = p.wait(timeout=30)
             except TimeoutError:
                 self.KnotDNSException('knotc unresponsive after stdin close', cmd=cmd)
             try:
