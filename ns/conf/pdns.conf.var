@@ -13,4 +13,3 @@ carbon-ourname=${DESEC_NS_CARBONOURNAME}
 
 launch=lmdb
 lmdb-filename=/var/lib/powerdns/pdns.lmdb
-lmdb-sync-mode=nometasync
