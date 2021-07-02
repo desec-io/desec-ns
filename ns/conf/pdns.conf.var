@@ -1,6 +1,7 @@
 loglevel=5
 api=yes
 api-key=${DESEC_NS_APIKEY}
+dname-processing=yes
 setgid=pdns
 setuid=pdns
 slave=yes
