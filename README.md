@@ -22,7 +22,7 @@ Although most configuration is contained in this repository, some external depen
       - `DESEC_NS_APIKEY`: `ns` API key needed for replication operations
       - `DESEC_NS_CARBONSERVER`: pdns `carbon-server` setting (optional)
       - `DESEC_NS_CARBONOURNAME`: pdns `carbon-ourname` setting (optional)
-    - master-related
+    - primary-related
       - `DESECSTACK_VPN_SERVER`: VPN server hostname
 
 3.  Set up secrets for the VPN: Before setting up a deSEC nameserver, you will have to deploy the [deSEC main stack](https://github.com/desec-io/desec-stack) so that the nameserver can connect to it in order to fetch DNS data.

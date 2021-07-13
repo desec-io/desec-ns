@@ -8,7 +8,7 @@ import requests
 
 
 catalog_domain = 'catalog.internal.'
-master_ip = '172.16.7.3'
+primary_ip = '172.16.7.3'
 config = {
     'base_url': 'http://ns:8081/api/v1/servers/localhost',
     'headers': {
@@ -65,7 +65,7 @@ class Catalog:
 
     @property
     def remote_serial(self):
-        return query_serial(catalog_domain, master_ip)
+        return query_serial(catalog_domain, primary_ip)
 
     @property
     def serial(self):
@@ -107,7 +107,7 @@ class Catalog:
         # Apply additions
         for zone in additions:
             print(f'Adding zone {zone} ...')
-            pdns_request('post', path='/zones', body={'name': zone, 'kind': 'SLAVE', 'masters': [master_ip]})
+            pdns_request('post', path='/zones', body={'name': zone, 'kind': 'SLAVE', 'masters': [primary_ip]})
             local_zones.add(zone)
             print(f'Queueing initial AXFR for zone {zone} ...')
             pdns_request('put', path='/zones/{}/axfr-retrieve'.format(pdns_id(zone)))
