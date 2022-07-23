@@ -14,3 +14,6 @@ carbon-ourname=${DESEC_NS_CARBONOURNAME}
 
 launch=lmdb
 lmdb-filename=/var/lib/powerdns/pdns.lmdb
+
+enable-lua-records=_signal.${DESEC_NS_NAME}
+resolver=127.0.0.1  # trusted source for bootstrapping records

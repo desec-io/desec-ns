@@ -22,6 +22,8 @@ Although most configuration is contained in this repository, some external depen
       - `DESEC_NS_APIKEY`: `ns` API key needed for replication operations
       - `DESEC_NS_CARBONSERVER`: pdns `carbon-server` setting (optional)
       - `DESEC_NS_CARBONOURNAME`: pdns `carbon-ourname` setting (optional)
+      - `DESEC_NS_NAME`: name under which this name server will be reached, e.g. ns1.example.com (optional unless
+        `DESEC_NS_SIGNALING_DOMAIN_ZONE_PRIVATE_KEY_B64` is defined, see below)
     - primary-related
       - `DESECSTACK_VPN_SERVER`: VPN server hostname
 
@@ -30,6 +32,14 @@ Although most configuration is contained in this repository, some external depen
     Use this PKI now in order to create a new `client.key` and `client.crt` pair, and transfer these file securely to the nameserver, along with `ca.crt` and `ta.key` from the main stack deployment, and copy them into `openvpn-client/secrets/`.
     (You can also create `client.key` locally on the nameserver application and transfer a certificate signing request to the host at which your PKI is located.)
 
+4. (Optional) To set up DNSSEC Bootstrapping, a key for signing the zone in which the Signaling Domain is hosted.
+    The private key must be provided in `DESEC_NS_SIGNALING_DOMAIN_ZONE_PRIVATE_KEY_B64` in a format compatible with
+    `pdnsutil import-zone-key`, but encoded in base64. One way of obtaining such a key is by using `pdnsutil`:
+
+    pdnsutil generate-zone-key ksk ecdsa256 | grep -E 'Private-key-format:|Algorithm:|PrivateKey:' | base64 | tr -d '\n'
+
+    If using DNSSEC Bootstrapping, the `DESEC_NS_SIGNALING_DOMAIN_SOA_MNAME`, `DESEC_NS_SIGNALING_DOMAIN_SOA_RNAME`
+    environment variables should be provided for the Signaling Domain zone SOA record.
 
 ## How to Run
 

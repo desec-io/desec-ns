@@ -29,7 +29,8 @@ RUN set -ex \
 
 RUN rm -rf /etc/powerdns/
 COPY conf/ /etc/powerdns/
+COPY lua/ /usr/share/lua/5.1/
 
-COPY ./entrypoint.sh /root/
+COPY ./*.sh /usr/bin/local/
 
-CMD ["/root/entrypoint.sh"]
+CMD ["/usr/bin/local/entrypoint.sh"]

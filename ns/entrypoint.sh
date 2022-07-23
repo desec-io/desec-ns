@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Route required for asking questions into the stack-side network via VPN
 # Ths is assuming that the stack-side network prefix is 172.16
@@ -16,4 +16,9 @@ envsubst < /etc/powerdns/pdns.conf.var > /etc/powerdns/pdns.conf
 # Fix ownership (may be off after importing a backup)
 chown -R pdns:pdns /var/lib/powerdns
 
+# Create signaling domain zone if we have a private key
+[ -n "$DESEC_NS_SIGNALING_DOMAIN_ZONE_PRIVATE_KEY_B64" ] && \
+    su pdns -s /bin/bash -c /usr/bin/local/signaling_domain_zone.sh
+
+# Start pdns for production
 exec pdns_server --daemon=no

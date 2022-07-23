@@ -1,6 +1,10 @@
 # network
 DESEC_NS_IPV6_SUBNET=bade:affe:dead:beef:deec::/80
 DESEC_NS_IPV6_ADDRESS=bade:affe:dead:beef:deec:0642:ac10:0080
+DESEC_NS_NAME=ns1.example.com
+DESEC_NS_SIGNALING_DOMAIN_ZONE_PRIVATE_KEY_B64=replace
+DESEC_NS_SIGNALING_DOMAIN_SOA_MNAME=mname.example.com
+DESEC_NS_SIGNALING_DOMAIN_SOA_RNAME=rname.example.com
 
 # ns-related
 DESEC_NS_APIKEY=
