@@ -96,7 +96,11 @@ class Catalog:
 
     def perform_full_zone_sync(self):
         remote_zones = set(self.serials.keys())
-        local_serials = {zone['name']: zone['edited_serial'] for zone in pdns_request('get', path='/zones').json()}
+        local_serials = {
+            zone['name']: zone['edited_serial']
+            for zone in pdns_request('get', path='/zones').json()
+            if zone['kind'] == 'Slave'  # we only care about zones with 'Slave' status
+        }
         local_zones = set(local_serials.keys())
 
         # Compute changes
