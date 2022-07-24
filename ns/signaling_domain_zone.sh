@@ -7,7 +7,9 @@ pdnsutil create-zone "$SIGNALING_DOMAIN" || exit  # quit if zone exists
 pdnsutil replace-rrset "$SIGNALING_DOMAIN" "@" SOA \
     "${DESEC_NS_SIGNALING_DOMAIN_SOA_MNAME}. ${DESEC_NS_SIGNALING_DOMAIN_SOA_RNAME}. 0 86400 3600 2419200 3600"
 pdnsutil import-zone-key "$SIGNALING_DOMAIN" <(base64 -d <<< "$DESEC_NS_SIGNALING_DOMAIN_ZONE_PRIVATE_KEY_B64")
-pdnsutil increase-serial "$SIGNALING_DOMAIN"
+pdnsutil unset-presigned "$SIGNALING_DOMAIN"
+pdnsutil unset-nsec3 "$SIGNALING_DOMAIN"
+pdnsutil rectify-zone "$SIGNALING_DOMAIN"
 
 # Insert LUA records
 function lua {
