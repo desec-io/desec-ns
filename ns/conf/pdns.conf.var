@@ -1,4 +1,4 @@
-loglevel=7
+loglevel=5
 api=yes
 api-key=${DESEC_NS_APIKEY}
 dname-processing=yes
