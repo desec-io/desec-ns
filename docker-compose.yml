@@ -38,8 +38,8 @@ services:
     depends_on:
     - ns
     ports:
-    - "53:53"
-    - "53:53/udp"
+    - "${DESEC_NS_PUBLIC_PORT:-53}:53"
+    - "${DESEC_NS_PUBLIC_PORT:-53}:53/udp"
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
