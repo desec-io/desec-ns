@@ -40,9 +40,11 @@ services:
     ports:
     - "${DESEC_NS_PUBLIC_PORT:-53}:53"
     - "${DESEC_NS_PUBLIC_PORT:-53}:53/udp"
+    - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/tcp"
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
+    - DESEC_NS_NAME
     networks:
       front:
         ipv4_address: 10.16.0.2
