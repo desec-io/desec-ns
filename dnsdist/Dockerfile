@@ -1,12 +1,12 @@
 ARG DOCKER_REGISTRY
-FROM ${DOCKER_REGISTRY}debian:stretch
+FROM ${DOCKER_REGISTRY}debian:bullseye
 
 RUN set -ex \
 	# Prepare for adding repository
 	&& apt-get update \
 	&& apt-get install -y curl gnupg
 
-RUN echo 'deb [arch=amd64] http://repo.powerdns.com/debian stretch-dnsdist-15 main' \
+RUN echo 'deb [arch=amd64] http://repo.powerdns.com/debian bullseye-dnsdist-16 main' \
       >> /etc/apt/sources.list \
  && echo 'Package: dnsdist*' \
       > /etc/apt/preferences.d/dnsdist \
