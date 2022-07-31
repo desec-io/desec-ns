@@ -4,13 +4,11 @@ openssl req \
     -new \
     -newkey ec:<(openssl ecparam -name prime256v1) \
     -nodes \
-    -keyout /etc/dnsdist/dot.key \
+    -keyout /etc/certs/dox.key \
     -x509 \
     -days 3650 \
-    -out /etc/dnsdist/dot.cer \
+    -out /etc/certs/dox.cer \
     -subj "/C=DE/ST=Berlin/L=Berlin/O=deSEC/OU=autocert/CN=$DESEC_NS_NAME" \
     -addext "subjectAltName = DNS:$DESEC_NS_NAME"
 
-chmod 600 /etc/dnsdist/dot.key
-
-exec dnsdist --supervised
+chmod -R go-rwx /etc/certs

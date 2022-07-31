@@ -1,6 +1,16 @@
 version: '2.2'
 
 services:
+  certs:
+    image: nginx
+    environment:
+      - DESEC_NS_NAME
+    volumes:
+      - certs:/etc/certs
+      - ./certs/entrypoint.sh:/usr/local/bin/entrypoint.sh
+    command: entrypoint.sh
+    restart: 'no'
+
   ns:
     build: ns
     image: ${DOCKER_REGISTRY}desec/desec-ns:latest
@@ -38,6 +48,7 @@ services:
     init: true
     depends_on:
     - ns
+    - certs
     ports:
     - "${DESEC_NS_PUBLIC_PORT:-53}:53"
     - "${DESEC_NS_PUBLIC_PORT:-53}:53/udp"
@@ -46,6 +57,8 @@ services:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
     - DESEC_NS_NAME
+    volumes:
+    - certs:/etc/dnsdist/certs
     networks:
       front:
         ipv4_address: 10.16.0.2
@@ -139,6 +152,7 @@ volumes:
   ns:
   prometheus:
   openvpn-client_logs:
+  certs:
 
 networks:
   # Note that it is required that the front network ranks lower (in lexical order by

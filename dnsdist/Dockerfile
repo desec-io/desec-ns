@@ -24,6 +24,5 @@ RUN set -ex \
 
 RUN rm -rf /etc/dnsdist/
 COPY conf/ /etc/dnsdist/
-COPY entrypoint.sh /usr/local/bin/
 
-CMD ["entrypoint.sh"]
+CMD ["dnsdist", "--supervised"]
