@@ -73,6 +73,26 @@ services:
         tag: "desec-ns/dnsdist"
     restart: unless-stopped
 
+  dnsproxy:
+    build: dnsproxy
+    image: ${DOCKER_REGISTRY}desec/desec-ns-dnsproxy:latest
+    init: true
+    depends_on:
+    - dnsdist
+    ports:
+    - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
+    volumes:
+    - certs:/etc/dnsproxy/certs/
+    networks:
+      front:
+        ipv4_address: 10.16.0.3
+      middle:
+    logging:
+      driver: "syslog"
+      options:
+        tag: "desec-ns/dnsproxy"
+    restart: unless-stopped
+
   openvpn-client:
     build: openvpn-client
     image: desec/openvpn-client:latest
