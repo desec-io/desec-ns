@@ -1,4 +1,4 @@
-FROM golang:bullseye
+FROM golang:1.18-bullseye
 
 RUN git clone https://github.com/AdguardTeam/dnsproxy.git
 WORKDIR dnsproxy
