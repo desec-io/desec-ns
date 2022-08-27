@@ -15,5 +15,7 @@ DESEC_NS_COOKIES_SECRET=32 hexadecimal characters
 
 # replication-related
 DESECSTACK_VPN_SERVER=
+
+# for local testing
 DESEC_NS_PUBLIC_PORT=
 DESEC_NS_PUBLIC_PORT_DOT=
