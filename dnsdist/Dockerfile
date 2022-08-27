@@ -18,11 +18,12 @@ RUN echo 'deb [arch=amd64] http://repo.powerdns.com/debian bullseye-dnsdist-17 m
 RUN set -ex \
 	&& curl https://repo.powerdns.com/FD380FBB-pub.asc | apt-key add - \
 	&& apt-get update \
-	&& apt-get install -y dnsdist \
+	&& apt-get install -y dnsdist iptables \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN rm -rf /etc/dnsdist/
 COPY conf/ /etc/dnsdist/
+COPY entrypoint.sh /usr/local/bin/
 
-CMD ["dnsdist", "--supervised"]
+CMD entrypoint.sh

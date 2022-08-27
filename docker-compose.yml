@@ -49,14 +49,18 @@ services:
     depends_on:
     - ns
     - certs
+    cap_add:
+    - NET_ADMIN
     ports:
     - "${DESEC_NS_PUBLIC_PORT:-53}:53"
     - "${DESEC_NS_PUBLIC_PORT:-53}:53/udp"
     - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/tcp"
+    - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
     - DESEC_NS_NAME
+    - DESEC_NS_IPV6_PREFIX
     volumes:
     - certs:/etc/dnsdist/certs
     networks:
@@ -79,8 +83,6 @@ services:
     init: true
     depends_on:
     - dnsdist
-    ports:
-    - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
     volumes:
     - certs:/etc/dnsproxy/certs/
     networks:
