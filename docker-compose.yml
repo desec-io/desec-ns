@@ -55,12 +55,11 @@ services:
     - "${DESEC_NS_PUBLIC_PORT:-53}:53"
     - "${DESEC_NS_PUBLIC_PORT:-53}:53/udp"
     - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/tcp"
-    - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
+    - "0.0.0.0:${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
     - DESEC_NS_NAME
-    - DESEC_NS_IPV6_PREFIX
     volumes:
     - certs:/etc/dnsdist/certs
     networks:
@@ -69,6 +68,7 @@ services:
         ipv6_address: ${DESEC_NS_IPV6_ADDRESS}
       middle:
         ipv4_address: 10.16.2.3
+      reardnsdist_dnsproxy:
       rearmonitoring_dnsdist:
         ipv4_address: 10.16.4.10
     logging:
@@ -86,8 +86,8 @@ services:
     volumes:
     - certs:/etc/dnsproxy/certs/
     networks:
-      front:
-        ipv4_address: 10.16.0.3
+      reardnsdist_dnsproxy:
+        ipv4_address: 10.16.5.3
       middle:
     logging:
       driver: "syslog"
@@ -223,3 +223,10 @@ networks:
         config:
         - subnet: 10.16.4.8/29
           gateway: 10.16.4.9
+  reardnsdist_dnsproxy:
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 10.16.5.0/24
+            gateway: 10.16.5.1
