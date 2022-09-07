@@ -69,6 +69,7 @@ services:
       middle:
         ipv4_address: 10.16.2.3
       reardnsdist_dnsproxy:
+        ipv4_address: 10.16.5.2
       rearmonitoring_dnsdist:
         ipv4_address: 10.16.4.10
     logging:
@@ -88,7 +89,6 @@ services:
     networks:
       reardnsdist_dnsproxy:
         ipv4_address: 10.16.5.3
-      middle:
     logging:
       driver: "syslog"
       options:
