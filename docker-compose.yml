@@ -27,10 +27,10 @@ services:
     - DESEC_NS_SIGNALING_DOMAIN_SOA_RNAME
     - DESEC_NS_COOKIES_SECRET
     networks:
-      middle:
+      nsmiddle:
         ipv4_address: 10.16.2.2
-      rear:
-      rearreplication:
+      nsrear:
+      nsrearreplication:
         ipv4_address: 10.16.3.3
     sysctls:
       net.ipv4.icmp_echo_ignore_broadcasts: 0
@@ -63,14 +63,14 @@ services:
     volumes:
     - dox-certs:/etc/dnsdist/certs
     networks:
-      front:
+      nsfront:
         ipv4_address: 10.16.0.2
         ipv6_address: ${DESEC_NS_IPV6_ADDRESS}
-      middle:
+      nsmiddle:
         ipv4_address: 10.16.2.3
-      reardnsdist_dnsproxy:
+      nsreardnsdist_dnsproxy:
         ipv4_address: 10.16.5.2
-      rearmonitoring_dnsdist:
+      nsrearmonitoring_dnsdist:
         ipv4_address: 10.16.4.10
     logging:
       driver: "syslog"
@@ -87,7 +87,7 @@ services:
     volumes:
     - dox-certs:/etc/dnsproxy/certs/
     networks:
-      reardnsdist_dnsproxy:
+      nsreardnsdist_dnsproxy:
         ipv4_address: 10.16.5.3
     logging:
       driver: "syslog"
@@ -107,7 +107,7 @@ services:
     - ./openvpn-client/secrets:/etc/openvpn/secrets:ro
     - openvpn-client_logs:/var/log/openvpn
     networks:
-      rearreplication:
+      nsrearreplication:
         ipv4_address: 10.16.3.2
     logging:
       driver: "syslog"
@@ -123,7 +123,7 @@ services:
     volumes:
     - openvpn-client_logs:/var/log/openvpn:ro
     networks:
-    - rearmonitoring_openvpn-client
+    - nsrearmonitoring_openvpn-client
     command: -openvpn.status_paths /var/log/openvpn/openvpn-status.log
     logging:
       driver: "syslog"
@@ -144,7 +144,7 @@ services:
     - DESEC_NS_APIKEY
     - DESECSTACK_VPN_SERVER
     networks:
-      rearreplication:
+      nsrearreplication:
         ipv4_address: 10.16.3.4
     logging:
       driver: "syslog"
@@ -161,8 +161,8 @@ services:
     - ./prometheus/conf:/etc/prometheus:ro
     - prometheus:/prometheus
     networks:
-      rearmonitoring_openvpn-client:
-      rearmonitoring_dnsdist:
+      nsrearmonitoring_openvpn-client:
+      nsrearmonitoring_dnsdist:
         ipv4_address: 10.16.4.11
     logging:
       driver: "syslog"
@@ -179,7 +179,7 @@ volumes:
 networks:
   # Note that it is required that the front network ranks lower (in lexical order by
   # name) than the other networks. See https://github.com/docker/docker/issues/27101
-  front:
+  nsfront:
     enable_ipv6: true
     driver: bridge
     ipam:
@@ -188,42 +188,42 @@ networks:
       - subnet: 10.16.0.0/24
         gateway: 10.16.0.1
       - subnet: ${DESEC_NS_IPV6_SUBNET}
-  middle:
+  nsmiddle:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 10.16.2.0/24
         gateway: 10.16.2.1
-  rear:
+  nsrear:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 10.16.1.0/24
         gateway: 10.16.1.1
-  rearreplication:
+  nsrearreplication:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 10.16.3.0/24
         gateway: 10.16.3.1
-  rearmonitoring_openvpn-client:
+  nsrearmonitoring_openvpn-client:
       driver: bridge
       ipam:
         driver: default
         config:
         - subnet: 10.16.4.0/29
           gateway: 10.16.4.1
-  rearmonitoring_dnsdist:
+  nsrearmonitoring_dnsdist:
       driver: bridge
       ipam:
         driver: default
         config:
         - subnet: 10.16.4.8/29
           gateway: 10.16.4.9
-  reardnsdist_dnsproxy:
+  nsreardnsdist_dnsproxy:
       driver: bridge
       ipam:
         driver: default
