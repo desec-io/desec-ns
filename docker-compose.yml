@@ -1,13 +1,13 @@
 version: '2.2'
 
 services:
-  certs:
+  dox-certs:
     image: nginx
     environment:
       - DESEC_NS_NAME
     volumes:
-      - certs:/etc/certs
-      - ./certs/entrypoint.sh:/usr/local/bin/entrypoint.sh
+      - dox-certs:/etc/certs
+      - ./dox-certs/entrypoint.sh:/usr/local/bin/entrypoint.sh
     command: entrypoint.sh
     restart: 'no'
 
@@ -48,7 +48,7 @@ services:
     init: true
     depends_on:
     - ns
-    - certs
+    - dox-certs
     cap_add:
     - NET_ADMIN
     ports:
@@ -61,7 +61,7 @@ services:
     - DESEC_NS_CARBONOURNAME
     - DESEC_NS_NAME
     volumes:
-    - certs:/etc/dnsdist/certs
+    - dox-certs:/etc/dnsdist/certs
     networks:
       front:
         ipv4_address: 10.16.0.2
@@ -85,7 +85,7 @@ services:
     depends_on:
     - dnsdist
     volumes:
-    - certs:/etc/dnsproxy/certs/
+    - dox-certs:/etc/dnsproxy/certs/
     networks:
       reardnsdist_dnsproxy:
         ipv4_address: 10.16.5.3
@@ -174,7 +174,7 @@ volumes:
   ns:
   prometheus:
   openvpn-client_logs:
-  certs:
+  dox-certs:
 
 networks:
   # Note that it is required that the front network ranks lower (in lexical order by
