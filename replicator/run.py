@@ -7,6 +7,7 @@ import dns.message, dns.query, dns.rdatatype
 import requests
 
 
+ssl_verify = os.environ.get('DESEC_NS_E2E2') is None
 catalog_domain = 'catalog.internal.'
 primary_ip = '172.16.7.3'
 config = {
@@ -73,7 +74,11 @@ class Catalog:
 
     def _retrieve(self):
         # Throws Timeout exception if nothing is received for `timeout` seconds
-        r = requests.get('https://{}/api/v1/serials/'.format(os.environ['DESECSTACK_VPN_SERVER']), timeout=10)
+        r = requests.get(
+            'https://{}/api/v1/serials/'.format(os.environ['DESECSTACK_VPN_SERVER']),
+            timeout=10,
+            verify=ssl_verify,
+        )
         if r.status_code not in range(200, 300):
             print(r.__dict__)
             raise Exception()

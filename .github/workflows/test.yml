@@ -1,0 +1,116 @@
+name: test
+
+on:
+  push:
+    # run on push to main branch
+    branches: [ main ]
+  pull_request:
+    # run for pull requests against main
+    branches: [ main ]
+
+env:
+  DESECSTACK_VPN_SERVER: 127.0.0.1
+  DESEC_NS_NAME: ns.example.dedyn.io
+  DESEC_NS_SIGNALING_DOMAIN_ZONE_PRIVATE_KEY_B64: UHJpdmF0ZS1rZXktZm9ybWF0OiB2MS4yDQpBbGdvcml0aG06IDEzIChFQ0RTQVAyNTZTSEEyNTYpDQpQcml2YXRlS2V5OiBvUzBKMjBkWFNEdDNlbE84WTFLaUhjUzNwSnd2KzFDeHpFVVhianRTbHk0PQ0KDQo=
+  DESEC_NS_SIGNALING_DOMAIN_SOA_MNAME: mname.example.com
+  DESEC_NS_SIGNALING_DOMAIN_SOA_RNAME:  rname.example.com
+  DESEC_NS_APIKEY: asdf
+  DESEC_NS_CARBONSERVER: 127.0.0.1
+  DESEC_NS_CARBONOURNAME: desec-ns-gh-action
+  DESEC_NS_COOKIES_SECRET: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  DESEC_NS_IPV6_SUBNET: bade:affe:dead:beef:deec::/80
+  DESEC_NS_IPV6_ADDRESS: bade:affe:dead:beef:deec:0642:ac10:0080
+  DESEC_NS_PUBLIC_PORT: 5399
+  DESEC_NS_PUBLIC_PORT_DOT: 53853
+  DESECSTACK_DOMAIN: your.hostname.example.com
+  DESECSTACK_NS: ns1.example.com ns2.example.com
+  DESECSTACK_API_ADMIN: john.doe@example.com
+  DESECSTACK_API_AUTHACTION_VALIDITY: 24
+  DESECSTACK_API_SEPA_CREDITOR_ID: TESTCREDITORID
+  DESECSTACK_API_SEPA_CREDITOR_NAME: TESTCREDITORNAME
+  DESECSTACK_API_EMAIL_HOST: mail.your.hostname.example.com
+  DESECSTACK_API_EMAIL_HOST_USER: user
+  DESECSTACK_API_EMAIL_HOST_PASSWORD: password
+  DESECSTACK_API_EMAIL_PORT: 25
+  DESECSTACK_API_SECRETKEY: 9Fn33T5yGuds
+  DESECSTACK_API_PSL_RESOLVER: 8.8.8.8
+  DESECSTACK_DBAPI_PASSWORD_desec: 9Fn33T5yGueeee
+  DESECSTACK_NSLORD_APIKEY: 9Fn33T5yGukjekwjew
+  DESECSTACK_NSLORD_DEFAULT_TTL: 1234
+  DESECSTACK_DBMASTER_PASSWORD_pdns: 9Fn33T5yGukjwelt
+  DESECSTACK_NSMASTER_ALSO_NOTIFY:
+  DESECSTACK_NSMASTER_APIKEY: LLq1orOQuXCINUz4TV
+  DESECSTACK_NSMASTER_TSIGKEY: +++undefined/undefined/undefined/undefined/undefined/undefined/undefined/undefined+++A==
+  DESECSTACK_IPV4_REAR_PREFIX16: 172.16
+  DESECSTACK_IPV6_SUBNET: bade:affe:dead:beef:b011::/80
+  DESECSTACK_IPV6_ADDRESS: bade:affe:dead:beef:b011:0642:ac10:0080
+  DESECSTACK_PORT_XFR: 12353
+  DESECSTACK_WWW_CERTS: ./certs
+  DESECSTACK_MINIMUM_TTL_DEFAULT: 3600
+  DESECSTACK_PROMETHEUS_PASSWORD: Je9NNkqbULsg
+
+jobs:
+
+  test-e2e2:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout desec-ns
+      uses: actions/checkout@v3
+      with:
+        path: desec-ns
+
+    - name: Checkout desec-stack
+      uses: actions/checkout@v3
+      with:
+        repository: desec-io/desec-stack
+        path: desec-stack
+        ref: main
+
+    - name: Create necessary symlinks in desec-stack  # desec-stack is docker-compose base directory
+      run: |
+        ln -s ../desec-ns/dnsdist
+        ln -s ../desec-ns/dnsproxy
+        ln -s ../desec-ns/dox-certs
+        ln -s ../desec-ns/ns
+        ln -s ../desec-ns/openvpn-client
+        ln -s ../desec-ns/replicator
+      working-directory: ./desec-stack
+
+    - name: Create necessary symlinks in desec-ns  # desec-ns is working dir for vpn-setup below
+      run: |
+        ln -s ../desec-stack/openvpn-server
+      working-directory: ./desec-ns
+
+    - name: Generate VPN Certs
+      run: |
+        sudo apt install -y openvpn
+        ./vpn-setup.sh
+      working-directory: ./desec-ns
+
+    - name: File Overview
+      run: |
+        pwd
+        ls -lah
+        echo desec-ns %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        ls -lah desec-ns
+        echo desec-stack %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        ls -lah desec-stack
+        echo desec-stack/openvpn-server/secrets %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        ls -lah desec-stack/openvpn-server/secrets
+        echo desec-stack/openvpn-client/secrets %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        ls -lah desec-stack/openvpn-client/secrets
+
+    - name: Build images
+      run: docker-compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml build
+      working-directory: ./desec-ns
+
+    - name: Run e2e2 Tests
+      run: docker-compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml run -T test-e2e2 sh -c "./apiwait 300 && python3 -m pytest -vv --skip-performance-tests ."
+      working-directory: ./desec-ns
+
+    - name: e2e2 Test Logs
+      if: always()
+      run: |
+        docker-compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml ps
+        grep 'desec' /var/log/syslog
+      working-directory: ./desec-ns
