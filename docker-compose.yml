@@ -17,6 +17,9 @@ services:
     init: true
     cap_add:
     - NET_ADMIN
+    ports:
+    - "${DESEC_NS_PUBLIC_PORT:-53}:53"
+    - "${DESEC_NS_PUBLIC_PORT:-53}:53/udp"
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
@@ -27,10 +30,15 @@ services:
     - DESEC_NS_SIGNALING_DOMAIN_SOA_RNAME
     - DESEC_NS_COOKIES_SECRET
     networks:
+      nsfront:
+        ipv4_address: 10.16.0.3
+        ipv6_address: ${DESEC_NS_IPV6_ADDRESS}
       nsmiddle:
         ipv4_address: 10.16.2.2
       nsrearreplication:
         ipv4_address: 10.16.3.3
+      nsreardoq:
+        ipv4_address: 10.16.5.2
     sysctls:
       net.ipv4.icmp_echo_ignore_broadcasts: 0
     volumes:
@@ -51,8 +59,6 @@ services:
     cap_add:
     - NET_ADMIN
     ports:
-    - "${DESEC_NS_PUBLIC_PORT:-53}:53"
-    - "${DESEC_NS_PUBLIC_PORT:-53}:53/udp"
     - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/tcp"
     - "0.0.0.0:${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
     environment:
@@ -61,13 +67,8 @@ services:
     volumes:
     - dox-certs:/etc/dnsdist/certs
     networks:
-      nsfront:
-        ipv4_address: 10.16.0.2
-        ipv6_address: ${DESEC_NS_IPV6_ADDRESS}
       nsmiddle:
         ipv4_address: 10.16.2.3
-      nsreardnsdist_dnsproxy:
-        ipv4_address: 10.16.5.2
       nsrearmonitoring_dnsdist:
         ipv4_address: 10.16.4.10
     logging:
@@ -85,7 +86,7 @@ services:
     volumes:
     - dox-certs:/etc/dnsproxy/certs/
     networks:
-      nsreardnsdist_dnsproxy:
+      nsreardoq:
         ipv4_address: 10.16.5.3
     logging:
       driver: "syslog"
@@ -214,7 +215,7 @@ networks:
         config:
         - subnet: 10.16.4.8/29
           gateway: 10.16.4.9
-  nsreardnsdist_dnsproxy:
+  nsreardoq:
       driver: bridge
       ipam:
         driver: default
