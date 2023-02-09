@@ -29,7 +29,6 @@ services:
     networks:
       nsmiddle:
         ipv4_address: 10.16.2.2
-      nsrear:
       nsrearreplication:
         ipv4_address: 10.16.3.3
     sysctls:
@@ -59,7 +58,6 @@ services:
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
-    - DESEC_NS_NAME
     volumes:
     - dox-certs:/etc/dnsdist/certs
     networks:
@@ -195,13 +193,6 @@ networks:
       config:
       - subnet: 10.16.2.0/24
         gateway: 10.16.2.1
-  nsrear:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: 10.16.1.0/24
-        gateway: 10.16.1.1
   nsrearreplication:
     driver: bridge
     ipam:
