@@ -9,5 +9,5 @@ CMD ./dnsproxy -l 0.0.0.0 \
     --quic-port=853 \
     --tls-crt=/etc/dnsproxy/certs/dox.cer \
     --tls-key=/etc/dnsproxy/certs/dox.key \
-    -u dnsdist:53 \
+    -u ns:53 \
     -p 0 \

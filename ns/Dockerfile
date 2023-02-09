@@ -23,6 +23,8 @@ RUN set -ex \
 	&& apt-get -y install gettext-base \
 	# VPN route
 	&& apt-get -y install iproute2 \
+	# DoX routing
+	&& apt-get -y install iptables \
 	# cleanup
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*

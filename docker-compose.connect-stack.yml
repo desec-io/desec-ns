@@ -15,9 +15,9 @@ services:
       - DESEC_NS_E2E2=1
   test-e2e2:
     environment:
-      - DESECSTACK_E2E2_SECONDARY_NS=10.16.0.2
+      - DESECSTACK_E2E2_SECONDARY_NS=10.16.0.3
     depends_on:
-      - dnsdist
+      - ns
       - replicator
       - openvpn-server
     networks:

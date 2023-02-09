@@ -20,5 +20,9 @@ chown -R pdns:pdns /var/lib/powerdns
 [ -n "$DESEC_NS_SIGNALING_DOMAIN_ZONE_PRIVATE_KEY_B64" ] && \
     su pdns -s /bin/bash -c /usr/bin/local/signaling_domain_zone.sh
 
+iptables -t nat -A PREROUTING -p tcp --dport 853 -j DNAT --to-destination 10.16.2.3:853  # dnsdist
+iptables -t nat -A PREROUTING -p udp --dport 853 -j DNAT --to-destination 10.16.5.3:853  # dnsproxy
+iptables -t nat -A POSTROUTING -j MASQUERADE
+
 # Start pdns for production
 exec pdns_server --daemon=no
