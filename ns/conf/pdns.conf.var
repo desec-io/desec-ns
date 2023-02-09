@@ -1,6 +1,7 @@
 loglevel=5
 api=yes
 api-key=${DESEC_NS_APIKEY}
+cache-ttl=0  # as advised in https://doc.powerdns.com/authoritative/performance.html#packet-cache
 distributor-threads=1  # LMDB does not need several
 dname-processing=yes
 receiver-threads=${_NPROC}
