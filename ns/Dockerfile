@@ -23,6 +23,8 @@ RUN set -ex \
 	&& apt-get -y install gettext-base \
 	# VPN route & multicast
 	&& apt-get -y install iproute2 smcroute \
+	# DoX routing
+	&& apt-get -y install iptables \
 	# cleanup
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
