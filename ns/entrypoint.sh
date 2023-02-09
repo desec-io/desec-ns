@@ -10,7 +10,8 @@
 echo mgroup from eth2 group 239.1.2.3 > /etc/smcroute.conf
 /usr/sbin/smcroute -d
 
-# Manage credentials
+# Render configuration
+export _NPROC=$(nproc)
 envsubst < /etc/powerdns/pdns.conf.var > /etc/powerdns/pdns.conf
 
 # Fix ownership (may be off after importing a backup)
