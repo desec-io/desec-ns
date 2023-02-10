@@ -20,6 +20,8 @@ services:
     ports:
     - "${DESEC_NS_PUBLIC_PORT:-53}:53"
     - "${DESEC_NS_PUBLIC_PORT:-53}:53/udp"
+    - "0.0.0.0:${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/tcp"
+    - "0.0.0.0:${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
@@ -58,9 +60,6 @@ services:
     - dox-certs
     cap_add:
     - NET_ADMIN
-    ports:
-    - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/tcp"
-    - "0.0.0.0:${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
