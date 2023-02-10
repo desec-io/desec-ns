@@ -20,7 +20,6 @@ services:
     ports:
     - "${DESEC_NS_PUBLIC_PORT:-53}:53"
     - "${DESEC_NS_PUBLIC_PORT:-53}:53/udp"
-    - "0.0.0.0:${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
@@ -82,9 +81,11 @@ services:
     image: ${DOCKER_REGISTRY}desec/desec-ns-dnsproxy:latest
     init: true
     depends_on:
-    - dnsdist
+    - ns
     volumes:
     - dox-certs:/etc/dnsproxy/certs/
+    ports:
+    - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/udp"
     networks:
       nsreardoq:
         ipv4_address: 10.16.5.3
