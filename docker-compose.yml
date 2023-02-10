@@ -60,7 +60,7 @@ services:
     cap_add:
     - NET_ADMIN
     ports:
-      - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/tcp"
+    - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/tcp"
     environment:
     - DESEC_NS_CARBONSERVER
     - DESEC_NS_CARBONOURNAME
