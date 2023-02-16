@@ -169,6 +169,13 @@ services:
         tag: "desec-ns/prometheus"
     restart: unless-stopped
 
+  dnsperf:
+    build: dnsperf
+    networks:
+      nsfront:
+        ipv4_address: 10.16.0.200
+
+
 volumes:
   ns:
   prometheus:
