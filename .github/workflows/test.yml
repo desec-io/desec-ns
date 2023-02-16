@@ -74,6 +74,7 @@ jobs:
         ln -s ../desec-ns/ns
         ln -s ../desec-ns/openvpn-client
         ln -s ../desec-ns/replicator
+        ln -s ../desec-ns/dnsperf
       working-directory: ./desec-stack
 
     - name: Create necessary symlinks in desec-ns  # desec-ns is working dir for vpn-setup below
