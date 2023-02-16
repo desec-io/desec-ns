@@ -1,33 +1,18 @@
 ARG DOCKER_REGISTRY
-FROM ${DOCKER_REGISTRY}ubuntu:bionic
+FROM ${DOCKER_REGISTRY}gentoo/portage:latest as portage
+FROM ${DOCKER_REGISTRY}gentoo/stage3:amd64-systemd
 
-RUN set -ex \
-	# Prepare for adding repository
-	&& apt-get update \
-	&& apt-get install -y curl gnupg smcroute
+# based on stage3 image
+FROM gentoo/stage3:latest
 
-RUN echo 'deb [arch=amd64] http://repo.powerdns.com/ubuntu bionic-auth-46 main' \
-      >> /etc/apt/sources.list \
- && echo 'Package: pdns-*' \
-      > /etc/apt/preferences.d/pdns \
- && echo 'Pin: origin repo.powerdns.com' \
-      >> /etc/apt/preferences.d/pdns \
- && echo 'Pin-Priority: 600' \
-      >> /etc/apt/preferences.d/pdns
+# copy the entire portage volume in
+COPY --from=portage /var/db/repos/gentoo /var/db/repos/gentoo
 
-RUN set -ex \
-	&& curl https://repo.powerdns.com/FD380FBB-pub.asc | apt-key add - \
-	&& apt-get update \
-	&& apt-get install -y pdns-server pdns-backend-lmdb \
-	# credentials management via envsubst
-	&& apt-get -y install gettext-base \
-	# VPN route
-	&& apt-get -y install iproute2 \
-	# DoX routing
-	&& apt-get -y install iptables \
-	# cleanup
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/*
+# configure portage
+COPY portage/* /etc/portage/
+
+RUN emerge mrouted iproute2 iptables
+RUN emerge -uDt pdns
 
 RUN rm -rf /etc/powerdns/
 COPY conf/ /etc/powerdns/

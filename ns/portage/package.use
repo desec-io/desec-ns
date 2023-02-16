@@ -1,0 +1,1 @@
+net-dns/pdns lmdb tools lua-records sodium -ldap -mysql -postgres -sqlite -geoip -doc -debug -mydns -remote -tinydns"
