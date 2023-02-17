@@ -4,7 +4,7 @@ FROM ${DOCKER_REGISTRY}ubuntu:bionic
 RUN set -ex \
 	# Prepare for adding repository
 	&& apt-get update \
-	&& apt-get install -y curl gnupg smcroute
+	&& apt-get install -y curl gnupg
 
 RUN echo 'deb [arch=amd64] http://repo.powerdns.com/ubuntu bionic-auth-46 main' \
       >> /etc/apt/sources.list \
@@ -21,8 +21,8 @@ RUN set -ex \
 	&& apt-get install -y pdns-server pdns-backend-lmdb \
 	# credentials management via envsubst
 	&& apt-get -y install gettext-base \
-	# VPN route
-	&& apt-get -y install iproute2 \
+	# VPN route & multicast
+	&& apt-get -y install iproute2 smcroute \
 	# cleanup
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
