@@ -1,12 +1,12 @@
 ARG DOCKER_REGISTRY
-FROM ${DOCKER_REGISTRY}ubuntu:bionic
+FROM ${DOCKER_REGISTRY}ubuntu:jammy
 
 RUN set -ex \
 	# Prepare for adding repository
 	&& apt-get update \
 	&& apt-get install -y curl gnupg
 
-RUN echo 'deb [arch=amd64] http://repo.powerdns.com/ubuntu bionic-auth-46 main' \
+RUN echo 'deb [arch=amd64] http://repo.powerdns.com/ubuntu jammy-auth-48 main' \
       >> /etc/apt/sources.list \
  && echo 'Package: pdns-*' \
       > /etc/apt/preferences.d/pdns \
