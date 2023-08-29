@@ -2,6 +2,7 @@ loglevel=5
 api=yes
 api-key=${DESEC_NS_APIKEY}
 dname-processing=yes
+max-tcp-connections=4096
 receiver-threads=${_NPROC}
 setgid=pdns
 setuid=pdns
