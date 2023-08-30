@@ -1,8 +1,11 @@
 loglevel=5
 api=yes
 api-key=${DESEC_NS_APIKEY}
+consistent-backends=no  # not needed when query cache is off
 dname-processing=yes
 max-tcp-connections=4096
+negquery-cache-ttl=0  # according to pdns IRC, can be turned off for in-memory backend
+query-cache-ttl=0  # according to pdns IRC, can be turned off for in-memory backend
 receiver-threads=${_NPROC}
 reuseport=yes
 setgid=pdns
