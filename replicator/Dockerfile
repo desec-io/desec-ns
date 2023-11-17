@@ -1,5 +1,5 @@
 ARG DOCKER_REGISTRY
-FROM ${DOCKER_REGISTRY}python:3.8-alpine
+FROM ${DOCKER_REGISTRY}python:3.12-alpine
 
 WORKDIR /usr/src/app
 
