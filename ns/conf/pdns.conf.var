@@ -11,6 +11,7 @@ reuseport=yes
 setgid=pdns
 setuid=pdns
 secondary=yes
+udp-truncation-threshold=1400  # https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-avoid-fragmentation-15#section-3.1
 version-string=anonymous
 webserver=yes
 webserver-address=10.16.3.3
