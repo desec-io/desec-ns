@@ -1,13 +1,15 @@
 ARG DOCKER_REGISTRY
-FROM ${DOCKER_REGISTRY}debian:bullseye
+FROM ${DOCKER_REGISTRY}debian:bookworm
 
 RUN set -ex \
 	# Prepare for adding repository
 	&& apt-get update \
 	&& apt-get install -y curl gnupg
 
-RUN echo 'deb [arch=amd64] http://repo.powerdns.com/debian bullseye-dnsdist-17 main' \
-      >> /etc/apt/sources.list \
+RUN install -d /etc/apt/keyrings \
+ && curl https://repo.powerdns.com/FD380FBB-pub.asc | tee /etc/apt/keyrings/dnsdist-18-pub.asc \
+ && echo 'deb [signed-by=/etc/apt/keyrings/dnsdist-18-pub.asc arch=amd64] http://repo.powerdns.com/debian bookworm-dnsdist-18 main' \
+      >> /etc/apt/sources.list.d/dnsdist \
  && echo 'Package: dnsdist*' \
       > /etc/apt/preferences.d/dnsdist \
  && echo 'Pin: origin repo.powerdns.com' \
