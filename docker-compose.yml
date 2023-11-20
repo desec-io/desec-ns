@@ -78,8 +78,7 @@ services:
     restart: unless-stopped
 
   dnsproxy:
-    build: dnsproxy
-    image: ${DOCKER_REGISTRY}desec/desec-ns-dnsproxy:latest
+    image: adguard/dnsproxy:v0.59.0
     init: true
     depends_on:
     - dnsdist
@@ -88,6 +87,14 @@ services:
     networks:
       nsreardoq:
         ipv4_address: 10.16.5.3
+    command: [
+      "--listen=0.0.0.0",
+      "--port=0",
+      "--quic-port=853",
+      "--tls-crt=/etc/dnsproxy/certs/dox.cer",
+      "--tls-key=/etc/dnsproxy/certs/dox.key",
+      "--upstream=ns:53",
+    ]
     logging:
       driver: "syslog"
       options:
