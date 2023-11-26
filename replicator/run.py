@@ -76,7 +76,7 @@ class Catalog:
         # Throws Timeout exception if nothing is received for `timeout` seconds
         r = requests.get(
             'https://{}/api/v1/serials/'.format(os.environ['DESECSTACK_VPN_SERVER']),
-            timeout=10,
+            timeout=30,
             verify=ssl_verify,
         )
         if r.status_code not in range(200, 300):
