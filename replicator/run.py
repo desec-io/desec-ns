@@ -2,6 +2,7 @@ import json
 import os
 import re
 from time import sleep, time
+from typing import Dict
 
 import dns.message, dns.query, dns.rdatatype
 import requests
@@ -10,40 +11,87 @@ import requests
 ssl_verify = os.environ.get('DESEC_NS_E2E2') is None
 catalog_domain = 'catalog.internal.'
 primary_ip = '172.16.7.3'
-config = {
-    'base_url': 'http://ns:8081/api/v1/servers/localhost',
-    'headers': {
-        'Accept': 'application/json',
-        'User-Agent': 'desec-ns',
-        'X-API-Key': os.environ['DESEC_NS_APIKEY'],
-    },
-}
 
 
-class PDNSException(Exception):
-    def __init__(self, response=None):
-        self.response = response
-        super().__init__(f'pdns response code: {response.status_code}, pdns response body: {response.text}')
+class Nameserver:
+
+    def get_local_zone_serials(self) -> Dict[str, int]:
+        """Returns a dictionary mapping all local zone names to their current serial."""
+        pass
+
+    def add_zone(self, name: str) -> None:
+        """Adds a new zone"""
+        pass
+
+    def axfr(self, name: str) -> None:
+        """Schedules AXFR for the zone with the given name."""
+        pass
+
+    def remove_zone(self, name: str) -> None:
+        """Removes the zone with the given name."""
+        pass
 
 
-def pdns_id(name):
-    # See also pdns code, apiZoneNameToId() in ws-api.cc (with the exception of forward slash)
-    if not re.match(r'^[a-zA-Z0-9_.-]+$', name):
-        raise ValueError('Invalid hostname ' + name)
+class PDNSNameserver(Nameserver):
 
-    name = name.translate(str.maketrans({'/': '=2F', '_': '=5F'}))
-    return name.rstrip('.') + '.'
+    class PDNSException(Exception):
+        def __init__(self, response=None):
+            self.response = response
+            super().__init__(f'pdns response code: {response.status_code}, pdns response body: {response.text}')
 
+    @staticmethod
+    def pdns_id(name):
+        # See also pdns code, apiZoneNameToId() in ws-api.cc (with the exception of forward slash)
+        if not re.match(r'^[a-zA-Z0-9_.-]+$', name):
+            raise ValueError('Invalid hostname ' + name)
 
-def pdns_request(method, *, path, body=None):
-    data = json.dumps(body) if body else None
+        name = name.translate(str.maketrans({'/': '=2F', '_': '=5F'}))
+        return name.rstrip('.') + '.'
 
-    # On timeout, we don't retry, as we don't know whether the request already had a side-effect on pdns
-    r = requests.request(method, config['base_url'] + path, data=data, headers=config['headers'], timeout=10)
-    if r.status_code not in range(200, 300):
-        raise PDNSException(response=r)
+    @classmethod
+    def pdns_request(cls, method, *, path, body=None):
+        data = json.dumps(body) if body else None
 
-    return r
+        # On timeout, we don't retry, as we don't know whether the request already had a side-effect on pdns
+        r = requests.request(
+            method,
+            'http://ns:8081/api/v1/servers/localhost' + path,
+            data=data,
+            headers={
+                'Accept': 'application/json',
+                'User-Agent': 'desec-ns',
+                'X-API-Key': os.environ['DESEC_NS_APIKEY'],
+            },
+            timeout=10
+        )
+        if r.status_code not in range(200, 300):
+            raise cls.PDNSException(response=r)
+
+        return r
+
+    def get_local_zone_serials(self) -> Dict[str, int]:
+        return {
+            zone['name']: zone['edited_serial']
+            for zone in self.pdns_request('get', path='/zones').json()
+            if zone['kind'] == 'Slave'  # we only care about zones with 'Slave' status
+        }
+
+    def add_zone(self, name: str) -> None:
+        self.pdns_request('post', path='/zones', body={'name': name, 'kind': 'SLAVE', 'masters': [primary_ip]})
+
+    def axfr(self, name: str) -> None:
+        self.pdns_request('put', path='/zones/{}/axfr-retrieve'.format(self.pdns_id(name)))
+
+    def remove_zone(self, name: str) -> None:
+        path = '/zones/{}'.format(self.pdns_id(name))
+        try:
+            self.pdns_request('delete', path=path)
+            self.pdns_request('get', path=path)  # confirm deletion
+        except self.PDNSException as e:
+            if e.response.status_code == 404:
+                pass
+            else:
+                raise e
 
 
 def query_serial(zone, server):
@@ -99,13 +147,9 @@ class Catalog:
         self._retrieve()
         return True
 
-    def perform_full_zone_sync(self):
+    def perform_full_zone_sync(self, ns: Nameserver):
         remote_zones = set(self.serials.keys())
-        local_serials = {
-            zone['name']: zone['edited_serial']
-            for zone in pdns_request('get', path='/zones').json()
-            if zone['kind'] == 'Slave'  # we only care about zones with 'Slave' status
-        }
+        local_serials = ns.get_local_zone_serials()
         local_zones = set(local_serials.keys())
 
         # Compute changes
@@ -116,34 +160,28 @@ class Catalog:
         # Apply additions
         for zone in additions:
             print(f'Adding zone {zone} ...')
-            pdns_request('post', path='/zones', body={'name': zone, 'kind': 'SLAVE', 'masters': [primary_ip]})
+            ns.add_zone(zone)
             local_zones.add(zone)
             print(f'Queueing initial AXFR for zone {zone} ...')
-            pdns_request('put', path='/zones/{}/axfr-retrieve'.format(pdns_id(zone)))
+            ns.axfr(zone)
 
         # Apply modifications
         for zone in modifications:
             print(f'Queueing AXFR for stale zone {zone} ...')
-            pdns_request('put', path='/zones/{}/axfr-retrieve'.format(pdns_id(zone)))
+            ns.axfr(zone)
 
         # Apply deletions
         for zone in deletions:
             print(f'Deleting zone {zone} ...')
-            path = '/zones/{}'.format(pdns_id(zone))
-            try:
-                pdns_request('delete', path=path)
-                pdns_request('get', path=path)  # confirm deletion
-            except PDNSException as e:
-                if e.response.status_code == 404:
-                    local_zones.discard(zone)
-                    print(f'Zone {zone} deleted.')
-                else:
-                    raise e
+            ns.remove_zone(zone)
+            local_zones.discard(zone)
+            print(f'Zone {zone} deleted.')
 
         return additions, deletions, modifications
 
 
 def main():
+    ns = PDNSNameserver()
     catalog = Catalog()
     processed_serial = None
     exit_when_done = os.environ.get('DESEC_NS_REPLICATOR_EXIT_WHEN_DONE', 0) == "1"
@@ -175,7 +213,7 @@ def main():
 
         # Compute and apply changes. Returns sets of domains names corresponding to added, deleted, modified domains.
         print('Running comprehensive serial check ...')
-        additions, deletions, modifications = catalog.perform_full_zone_sync()
+        additions, deletions, modifications = catalog.perform_full_zone_sync(ns)
 
         # Make a note that we processed this catalog version
         processed_serial = catalog.serial
