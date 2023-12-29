@@ -5,6 +5,7 @@ from time import sleep, time
 from typing import Dict
 
 import dns.message, dns.query, dns.rdatatype
+import libknot.control
 import requests
 
 
@@ -14,6 +15,12 @@ primary_ip = '172.16.7.3'
 
 
 class Nameserver:
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
     def get_local_zone_serials(self) -> Dict[str, int]:
         """Returns a dictionary mapping all local zone names to their current serial."""
@@ -78,6 +85,8 @@ class PDNSNameserver(Nameserver):
 
     def add_zone(self, name: str) -> None:
         self.pdns_request('post', path='/zones', body={'name': name, 'kind': 'SLAVE', 'masters': [primary_ip]})
+        print(f'Queueing initial AXFR for zone {name} ...')
+        self.axfr(name)
 
     def axfr(self, name: str) -> None:
         self.pdns_request('put', path='/zones/{}/axfr-retrieve'.format(self.pdns_id(name)))
@@ -92,6 +101,57 @@ class PDNSNameserver(Nameserver):
                 pass
             else:
                 raise e
+
+
+class KnotNameserver(Nameserver, libknot.control.KnotCtl):
+    transaction = False
+
+    def __enter__(self):
+        self.connect("/rundir/knot.sock")
+        self.set_timeout(60)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.transaction:
+            self._send_receive_block(cmd="conf-commit")
+        self.send(libknot.control.KnotCtlType.END)
+        self.close()
+
+    def _send_receive_block(self, *args, **kwargs):
+        self.send_block(*args, **kwargs)
+        return self.receive_block()
+
+    def get_local_zone_serials(self) -> Dict[str, int]:
+        resp = self._send_receive_block(cmd="zone-status")
+        return {
+            name: None if values['serial'] == '-' else int(values['serial'])
+            for name, values in resp.items()
+        }
+
+    def _ensure_conf_transaction(self):
+        if not self.transaction:
+            self._send_receive_block(cmd="conf-begin")
+            self.transaction = True
+
+    def add_zone(self, name: str) -> None:
+        try:
+            self._ensure_conf_transaction()
+            self._send_receive_block(cmd="conf-set", section="zone", item="domain", data=name)
+        except libknot.control.KnotCtlErrorRemote:
+            self._send_receive_block(cmd="conf-abort")
+
+    def axfr(self, name: str) -> None:
+        try:
+            self._send_receive_block(cmd="zone-retransfer", zone=name)
+        except libknot.control.KnotCtlErrorRemote as e:
+            print(f"AXFR request for {name} failed: {e}")
+
+    def remove_zone(self, name: str) -> None:
+        try:
+            self._ensure_conf_transaction()
+            self._send_receive_block(cmd="conf-unset", section="zone", item="domain", data=name)
+        except libknot.control.KnotCtlErrorRemote:
+            self._send_receive_block(cmd="conf-abort")
 
 
 def query_serial(zone, server):
@@ -147,41 +207,47 @@ class Catalog:
         self._retrieve()
         return True
 
-    def perform_full_zone_sync(self, ns: Nameserver):
+    def perform_full_zone_sync(self, ns_class: type[Nameserver]):
         remote_zones = set(self.serials.keys())
-        local_serials = ns.get_local_zone_serials()
+        with ns_class() as ns:
+            local_serials = ns.get_local_zone_serials()
         local_zones = set(local_serials.keys())
 
         # Compute changes
         additions = remote_zones - local_zones
         deletions = local_zones - remote_zones
-        modifications = {zone for zone, serial in local_serials.items() if self.serials.get(zone, 0) > serial}
+        modifications = {
+            zone for zone, local_serial in local_serials.items()
+            if local_serial is None or local_serial < self.serials.get(zone, 0)
+        }
 
-        # Apply additions
-        for zone in additions:
-            print(f'Adding zone {zone} ...')
-            ns.add_zone(zone)
-            local_zones.add(zone)
-            print(f'Queueing initial AXFR for zone {zone} ...')
-            ns.axfr(zone)
+        if additions or deletions:
+            with ns_class() as ns:
+                # Apply additions
+                for zone in additions:
+                    print(f'Adding zone {zone} ...')
+                    ns.add_zone(zone)
+                    local_zones.add(zone)
 
-        # Apply modifications
-        for zone in modifications:
-            print(f'Queueing AXFR for stale zone {zone} ...')
-            ns.axfr(zone)
+                # Apply deletions
+                for zone in deletions:
+                    print(f'Deleting zone {zone} ...')
+                    ns.remove_zone(zone)
+                    local_zones.discard(zone)
+                    print(f'Zone {zone} deleted.')
 
-        # Apply deletions
-        for zone in deletions:
-            print(f'Deleting zone {zone} ...')
-            ns.remove_zone(zone)
-            local_zones.discard(zone)
-            print(f'Zone {zone} deleted.')
+        if modifications:
+            with ns_class() as ns:
+                # Apply modifications
+                for zone in modifications:
+                    print(f'Queueing AXFR for stale zone {zone} ...')
+                    ns.axfr(zone)
 
         return additions, deletions, modifications
 
 
 def main():
-    ns = PDNSNameserver()
+    ns_class = KnotNameserver
     catalog = Catalog()
     processed_serial = None
     exit_when_done = os.environ.get('DESEC_NS_REPLICATOR_EXIT_WHEN_DONE', 0) == "1"
@@ -213,7 +279,8 @@ def main():
 
         # Compute and apply changes. Returns sets of domains names corresponding to added, deleted, modified domains.
         print('Running comprehensive serial check ...')
-        additions, deletions, modifications = catalog.perform_full_zone_sync(ns)
+        additions, deletions, modifications = catalog.perform_full_zone_sync(ns_class)
+        sleep(3)  # allow axfrs to complete before checking again
 
         # Make a note that we processed this catalog version
         processed_serial = catalog.serial

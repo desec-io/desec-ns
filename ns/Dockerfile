@@ -1,38 +1,17 @@
 ARG DOCKER_REGISTRY
-FROM ${DOCKER_REGISTRY}ubuntu:jammy
+FROM ${DOCKER_REGISTRY}cznic/knot:v3.3.4
 
 RUN set -ex \
-	# Prepare for adding repository
 	&& apt-get update \
-	&& apt-get install -y curl gnupg
-
-RUN echo 'deb [arch=amd64] http://repo.powerdns.com/ubuntu jammy-auth-48 main' \
-      >> /etc/apt/sources.list \
- && echo 'Package: pdns-*' \
-      > /etc/apt/preferences.d/pdns \
- && echo 'Pin: origin repo.powerdns.com' \
-      >> /etc/apt/preferences.d/pdns \
- && echo 'Pin-Priority: 600' \
-      >> /etc/apt/preferences.d/pdns
-
-RUN set -ex \
-	&& curl https://repo.powerdns.com/FD380FBB-pub.asc | apt-key add - \
-	&& apt-get update \
-	&& apt-get install -y pdns-server pdns-backend-lmdb \
-	# credentials management via envsubst
-	&& apt-get -y install gettext-base \
 	# VPN route & multicast
-	&& apt-get -y install iproute2 smcroute \
-	# DoX routing
-	&& apt-get -y install iptables \
+	&& apt-get -y install iproute2 smcroute gettext-base \
 	# cleanup
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN rm -rf /etc/powerdns/
-COPY conf/ /etc/powerdns/
-COPY lua/ /usr/share/lua/5.1/
+RUN mkdir -p /etc/knot
+COPY conf/knot.conf.var /etc/knot/
 
-COPY ./*.sh /usr/bin/local/
+COPY ./*.sh /usr/local/bin/
 
-CMD ["/usr/bin/local/entrypoint.sh"]
+CMD ["/usr/local/bin/entrypoint.sh"]

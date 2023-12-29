@@ -1,0 +1,35 @@
+clear: !(zone)
+
+server:
+    user: knot:knot
+    listen: 0.0.0.0@53
+    listen: ::@53
+    udp-max-payload: 1400
+    version: ""
+
+mod-rrl:
+  - id: default
+    rate-limit: 200   # Allow 200 resp/s for each flow
+    slip: 2           # Approximately every other response slips
+
+mod-cookies:
+  - id: default
+    secret: 0x${DESEC_NS_COOKIES_SECRET}
+
+remote:
+  - id: nsmaster
+    address: [172.16.7.3]
+
+template:
+  - id: default
+    semantic-checks: soft  # e.g. leaves below DNAME
+    global-module: [mod-cookies, mod-rrl/default, mod-stats]
+    master: nsmaster
+
+log:
+  - target: stdout
+    any: info  # does not include quic
+    quic: notice
+
+# TODO port config:
+#enable-lua-records=_signal.${DESEC_NS_NAME}

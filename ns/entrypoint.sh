@@ -11,19 +11,16 @@ echo mgroup from eth2 group 239.1.2.3 > /etc/smcroute.conf
 /usr/sbin/smcroute -d
 
 # Render configuration
-export _NPROC=$(nproc)
-envsubst < /etc/powerdns/pdns.conf.var > /etc/powerdns/pdns.conf
+envsubst < /etc/knot/knot.conf.var > /etc/knot/knot.conf
 
-# Fix ownership (may be off after importing a backup)
-chown -R pdns:pdns /var/lib/powerdns
+# TODO Create signaling domain zone if we have a private key
+#[ -n "$DESEC_NS_SIGNALING_DOMAIN_ZONE_PRIVATE_KEY_B64" ] && \
+#    su pdns -s /bin/bash -c /usr/bin/local/signaling_domain_zone.sh
 
-# Create signaling domain zone if we have a private key
-[ -n "$DESEC_NS_SIGNALING_DOMAIN_ZONE_PRIVATE_KEY_B64" ] && \
-    su pdns -s /bin/bash -c /usr/bin/local/signaling_domain_zone.sh
+# TODO Consider XDP, https://www.knot-dns.cz/docs/3.3/html/operation.html#pre-requisites
 
-iptables -t nat -A PREROUTING -p tcp --dport 853 -j DNAT --to-destination 10.16.2.3:853  # dnsdist
-iptables -t nat -A PREROUTING -p udp --dport 853 -j DNAT --to-destination 10.16.5.3:853  # dnsproxy
-iptables -t nat -A POSTROUTING -j MASQUERADE
+# Apply config to confdb
+knotc conf-import -f /etc/knot/knot.conf +nopurge
 
-# Start pdns for production
-exec pdns_server --daemon=no
+# Start knot for production
+exec knotd

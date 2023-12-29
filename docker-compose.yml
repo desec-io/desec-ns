@@ -15,6 +15,8 @@ services:
     build: ns
     image: ${DOCKER_REGISTRY}desec/desec-ns:latest
     init: true
+    depends_on:
+    - dox-certs
     cap_add:
     - NET_ADMIN
     ports:
@@ -43,7 +45,9 @@ services:
     sysctls:
       net.ipv4.icmp_echo_ignore_broadcasts: 0
     volumes:
-    - ns:/var/lib/powerdns
+    - ns:/storage
+    - knotsocket:/rundir
+    - dox-certs:/etc/knot/certs/
     logging:
       driver: "syslog"
       options:
@@ -149,6 +153,8 @@ services:
     environment:
     - DESEC_NS_APIKEY
     - DESECSTACK_VPN_SERVER
+    volumes:
+    - knotsocket:/rundir
     networks:
       nsrearreplication:
         ipv4_address: 10.16.3.4
@@ -182,6 +188,7 @@ volumes:
   prometheus:
   openvpn-client_logs:
   dox-certs:
+  knotsocket:
 
 networks:
   # Note that it is required that the front network ranks lower (in lexical order by
