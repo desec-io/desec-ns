@@ -4,6 +4,10 @@ server:
     user: knot:knot
     listen: 0.0.0.0@53
     listen: ::@53
+    listen-quic: 0.0.0.0
+    listen-quic: ::
+    key-file: /etc/knot/certs/dox.key
+    cert-file: /etc/knot/certs/dox.cer
     udp-max-payload: 1400
     version: ""
 
