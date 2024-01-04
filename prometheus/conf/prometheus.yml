@@ -21,3 +21,6 @@ scrape_configs:
     basic_auth:
       username: arbitrary
       password: we+ensure+security+via+network+segmentation
+  - job_name: 'knot-exporter'
+    static_configs:
+      - targets: ['knot-exporter:9433']

@@ -71,6 +71,7 @@ jobs:
         ln -s ../desec-ns/dnsdist
         ln -s ../desec-ns/dox-certs
         ln -s ../desec-ns/ns
+        ln -s ../desec-ns/knot-exporter
         ln -s ../desec-ns/openvpn-client
         ln -s ../desec-ns/replicator
         ln -s ../desec-ns/dnsperf

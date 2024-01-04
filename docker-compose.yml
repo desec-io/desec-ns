@@ -52,6 +52,18 @@ services:
         tag: "desec-ns/ns"
     restart: unless-stopped
 
+  knot-exporter:
+    build: knot-exporter
+    image: ${DOCKER_REGISTRY}desec/desec-knot-exporter:latest
+    init: true
+    volumes:
+    - knotsocket:/run/knot/
+    logging:
+      driver: "syslog"
+      options:
+        tag: "desec-ns/knot-exporter"
+    restart: unless-stopped
+
   dnsdist:
     build: dnsdist
     image: ${DOCKER_REGISTRY}desec/desec-ns-dnsdist:latest
