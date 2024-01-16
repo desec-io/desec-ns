@@ -218,7 +218,7 @@ class Catalog:
         deletions = local_zones - remote_zones
         modifications = {
             zone for zone, local_serial in local_serials.items()
-            if local_serial is None or local_serial < self.serials.get(zone, 0)
+            if zone not in deletions and (local_serial is None or local_serial < self.serials.get(zone, 0))
         }
 
         if additions or deletions:
