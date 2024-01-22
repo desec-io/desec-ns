@@ -68,7 +68,6 @@ jobs:
 
     - name: Create necessary symlinks in desec-stack  # desec-stack is docker-compose base directory
       run: |
-        ln -s ../desec-ns/dnsdist
         ln -s ../desec-ns/dox-certs
         ln -s ../desec-ns/ns
         ln -s ../desec-ns/knot-exporter

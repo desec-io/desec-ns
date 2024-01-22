@@ -2,10 +2,6 @@ version: '2.2'
 
 # mostly extending from main .yml
 services:
-  dnsdist:
-    entrypoint: ["echo", "Service disabled"]
-    restart: "no"
-
   openvpn-client_monitor:
     entrypoint: ["echo", "Service disabled"]
     restart: "no"

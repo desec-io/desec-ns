@@ -2,8 +2,7 @@
 
 This is a docker-compose application to run a nameserver. Zone data is automatically provided to this application via database replication. The application consists of
 
-- `dnsdist`: Frontend DNS load balancer (dnsdist), currently forwarding to the `ns` container. It is mainly there to support more advanced features in the future.
-- `ns`: Actual DNS server (PowerDNS).
+- `ns`: Actual DNS server.
 - `replicator`: Python container running a replication loop.
 - `openvpn-client`: OpenVPN client container providing network services for `ns` and `replicator`.
 
@@ -74,7 +73,7 @@ Take a backup file created in the previous step and store it at `./lmdb-backup/b
     exposing ports on the host IPv6 address through `docker-proxy`.
 
   - This stack is IPv6-capable. To prevent evil people from abusing this app for DNS amplification attacks, it is highly recommended to rate limit requests by IP (or take 
-    some smarter precaution). In particular, consider using the iptables hashlimit module, or dnsdist's traffic policy settings.
+    some smarter precaution). In particular, consider using he nameserver's policy settings, or the iptables hashlimit module.
 
     When using iptables, note that whenever you restart the docker daemon or this application (`docker-compose down; docker-compose up`), docker will insert its own rules 
     at the top of the chain. You therefore have to make sure that these rules get re-applied whenever docker decides to jump the queue.

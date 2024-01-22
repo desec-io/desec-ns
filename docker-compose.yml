@@ -64,33 +64,6 @@ services:
         tag: "desec-ns/knot-exporter"
     restart: unless-stopped
 
-  dnsdist:
-    build: dnsdist
-    image: ${DOCKER_REGISTRY}desec/desec-ns-dnsdist:latest
-    init: true
-    depends_on:
-    - ns
-    - dox-certs
-    cap_add:
-    - NET_ADMIN
-    ports:
-    - "${DESEC_NS_PUBLIC_PORT_DOT:-853}:853/tcp"
-    environment:
-    - DESEC_NS_CARBONSERVER
-    - DESEC_NS_CARBONOURNAME
-    volumes:
-    - dox-certs:/etc/dnsdist/certs
-    networks:
-      nsmiddle:
-        ipv4_address: 10.16.2.3
-      nsrearmonitoring_dnsdist:
-        ipv4_address: 10.16.4.10
-    logging:
-      driver: "syslog"
-      options:
-        tag: "desec-ns/dnsdist"
-    restart: unless-stopped
-
   openvpn-client:
     build: openvpn-client
     image: desec/openvpn-client:latest
@@ -160,8 +133,6 @@ services:
     - prometheus:/prometheus
     networks:
       nsrearmonitoring_openvpn-client:
-      nsrearmonitoring_dnsdist:
-        ipv4_address: 10.16.4.11
     logging:
       driver: "syslog"
       options:
@@ -209,10 +180,3 @@ networks:
         config:
         - subnet: 10.16.4.0/29
           gateway: 10.16.4.1
-  nsrearmonitoring_dnsdist:
-      driver: bridge
-      ipam:
-        driver: default
-        config:
-        - subnet: 10.16.4.8/29
-          gateway: 10.16.4.9
