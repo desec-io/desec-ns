@@ -6,7 +6,7 @@ RUN set -ex \
 	&& apt-get update \
 	&& apt-get install -y curl gnupg
 
-RUN echo 'deb [arch=amd64] http://repo.powerdns.com/ubuntu jammy-auth-48 main' \
+RUN echo 'deb [signed-by=/etc/apt/keyrings/auth-49-pub.asc arch=amd64] http://repo.powerdns.com/ubuntu jammy-auth-49 main' \
       >> /etc/apt/sources.list \
  && echo 'Package: pdns-*' \
       > /etc/apt/preferences.d/pdns \
@@ -16,7 +16,7 @@ RUN echo 'deb [arch=amd64] http://repo.powerdns.com/ubuntu jammy-auth-48 main' \
       >> /etc/apt/preferences.d/pdns
 
 RUN set -ex \
-	&& curl https://repo.powerdns.com/FD380FBB-pub.asc | apt-key add - \
+	&& install -d /etc/apt/keyrings && curl https://repo.powerdns.com/FD380FBB-pub.asc > /etc/apt/keyrings/auth-49-pub.asc \
 	&& apt-get update \
 	&& apt-get install -y pdns-server pdns-backend-lmdb \
 	# credentials management via envsubst
