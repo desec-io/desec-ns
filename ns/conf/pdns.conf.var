@@ -23,6 +23,5 @@ launch=lmdb
 lmdb-filename=/var/lib/powerdns/pdns.lmdb
 
 enable-lua-records=_signal.${DESEC_NS_NAME}
-resolver=127.0.0.1  # trusted source for bootstrapping records
 
 edns-cookie-secret=${DESEC_NS_COOKIES_SECRET}

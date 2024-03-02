@@ -14,6 +14,6 @@ pdnsutil rectify-zone "$SIGNALING_DOMAIN"
 
 # Insert LUA records
 function lua {
-  echo "$1 \";require('signaling') return signal('$SIGNALING_DOMAIN', pdns.$1)\""
+  echo "$1 \";require('signaling') return signal('$SIGNALING_DOMAIN', '$1')\""
 }
 pdnsutil replace-rrset "$SIGNALING_DOMAIN" "*" LUA 1 "$(lua CDS)" "$(lua CDNSKEY)"
