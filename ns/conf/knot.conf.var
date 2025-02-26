@@ -8,6 +8,7 @@ server:
     listen-quic: ::
     key-file: /etc/knot/certs/dox.key
     cert-file: /etc/knot/certs/dox.cer
+    automatic-acl: on
     udp-max-payload: 1400
     version: ""
 
