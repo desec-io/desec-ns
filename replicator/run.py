@@ -142,7 +142,7 @@ class KnotNameserver(Nameserver, libknot.control.KnotCtl):
 
     def axfr(self, name: str) -> None:
         try:
-            self._send_receive_block(cmd="zone-retransfer", zone=name)
+            self._send_receive_block(cmd="zone-retransfer", zone=name, flags="B")
         except libknot.control.KnotCtlErrorRemote as e:
             print(f"AXFR request for {name} failed: {e}")
 
