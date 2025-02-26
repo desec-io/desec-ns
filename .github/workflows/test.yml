@@ -105,17 +105,17 @@ jobs:
 
     - name: Build images
       run: |
-        docker-compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml build libfaketime  # used by others
-        docker-compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml build
+        docker compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml build libfaketime  # used by others
+        docker compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml build
       working-directory: ./desec-ns
 
     - name: Run e2e2 Tests
-      run: docker-compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml run -T test-e2e2 sh -c "./apiwait 300 && python3 -m pytest -vv --skip-performance-tests ."
+      run: docker compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml run -T test-e2e2 sh -c "./apiwait 300 && python3 -m pytest -vv --skip-performance-tests ."
       working-directory: ./desec-ns
 
     - name: e2e2 Test Logs
       if: always()
       run: |
-        docker-compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml ps
+        docker compose -f ../desec-stack/docker-compose.yml -f ../desec-stack/docker-compose.test-e2e2.yml -f docker-compose.yml -f docker-compose.connect-stack.yml ps
         grep 'desec' /var/log/syslog
       working-directory: ./desec-ns
