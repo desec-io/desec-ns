@@ -1,6 +1,5 @@
 ARG DOCKER_REGISTRY
-FROM ${DOCKER_REGISTRY}cznic/knot
-# TODO fix version
+FROM ${DOCKER_REGISTRY}cznic/knot:v3.5.3
 
 RUN apt-get update && \
     apt-get install -y \
