@@ -6,4 +6,3 @@ services:
     build: dnsperf
     networks:
       nsfront:
-        ipv4_address: 10.16.0.200

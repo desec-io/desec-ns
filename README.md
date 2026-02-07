@@ -14,9 +14,6 @@ Although most configuration is contained in this repository, some external depen
 1.  We run this software with the `--userland-proxy=false` flag of the `dockerd` daemon, and recommend you do the same.
 
 2.  Set sensitive information and network topology using environment variables or an `.env` file. You need (you can use the `env` file as a template):
-    - network
-      - `DESEC_NS_IPV6_SUBNET`: IPv6 net, ideally /80
-      - `DESEC_NS_IPV6_ADDRESS`: IPv6 address of frontend container
     - ns-related
       - `DESEC_NS_APIKEY`: `ns` API key needed for replication operations
       - `DESEC_NS_CARBONSERVER`: pdns `carbon-server` setting (optional)

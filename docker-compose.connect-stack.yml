@@ -22,7 +22,6 @@ services:
       - openvpn-server
     networks:
       nsfront:
-        ipv4_address: 10.16.0.127
 
 networks:
   vpnconnect:

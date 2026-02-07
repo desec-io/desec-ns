@@ -18,8 +18,6 @@ env:
   DESEC_NS_CARBONSERVER: 127.0.0.1
   DESEC_NS_CARBONOURNAME: desec-ns-gh-action
   DESEC_NS_COOKIES_SECRET: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-  DESEC_NS_IPV6_SUBNET: bade:affe:dead:beef:deec::/80
-  DESEC_NS_IPV6_ADDRESS: bade:affe:dead:beef:deec:0642:ac10:0080
   DESEC_NS_PUBLIC_PORT: 5399
   DESEC_NS_PUBLIC_PORT_DOT: 53853
   DESECSTACK_DOMAIN: your.hostname.example.com
