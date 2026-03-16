@@ -7,6 +7,9 @@ on:
   pull_request:
     # run for pull requests against main
     branches: [ main ]
+  schedule:
+    - cron: "5 4 * * 3"
+  workflow_dispatch:  # allows running from GitHub UI
 
 env:
   DESECSTACK_VPN_SERVER: 127.0.0.1
